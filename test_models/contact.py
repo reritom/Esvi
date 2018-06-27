@@ -1,8 +1,10 @@
-from models import EsviModel
+from esvi import models
+from esvi import fields
 
-class Contact(EsviModel):
-    name = "Contact"
+class Contact(models.EsviModel):
+    model_name = "Contact"
 
-    #fields = [Esvi.Field('name'),
-    #          Esvi.PrimaryKey('contact_id'),
-    #          Esvi.ForeignKey('message_id')]
+    contact_id = fields.PrimaryKey(default="0")
+    name = fields.StringField()
+    age = fields.IntegerField()
+    message = fields.ForeignKey(default='EmptyMessage')

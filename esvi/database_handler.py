@@ -1,6 +1,6 @@
 import os, json, uuid, datetime, time
 
-class Esvi():
+class DatabaseHandler():
 
     def __enter__(self):
         print("Entering the ESVI context")

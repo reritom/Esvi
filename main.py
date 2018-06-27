@@ -1,11 +1,11 @@
-from esvi import Esvi
+from esvi.database_handler import DatabaseHandler
 from test_models.contact import Contact
+from test_models.message import Message
 import os, time
 
 if __name__=='__main__':
     '''
-    esvi = Esvi()
-    print("DB located at {0}".format(cnx.db_path))
+    esvi = DatabaseHandler()
 
     esvi.create_db(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test.esvi'))
 
@@ -18,6 +18,8 @@ if __name__=='__main__':
     print("Unlocking db")
     esvi._unlock()
     '''
-    contact = Contact()
+    contact = Contact(age=15, name="Tom")
+    contact.get_fields()
+    contact.get_json()
 
-    print(contact)
+    message = Message()
