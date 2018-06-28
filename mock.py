@@ -7,8 +7,8 @@ from models.contact import Contact
 
 # Create a contact
 contact = Contact().create(name='Jack',
-                                message=message.models.retrieve(message_id='yyy-yyy-yyy'),
-                                contact_id="xxx-xxx-xxx")
+                           message=message.models.retrieve(message_id='yyy-yyy-yyy'),
+                           contact_id="xxx-xxx-xxx")
 
 # Retrieve all
 contacts = Contact().retrieve_all()

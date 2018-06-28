@@ -30,7 +30,7 @@ class IntegerField(BaseField):
     field_type = int
 
     def validate(self, value):
-        print("Validating IntegerField, value is {0}, type is {1}, expected type is {2}".format(value, type(value), StringField.field_type))
+        print("Validating IntegerField, value is {0}, type is {1}, expected type is {2}".format(value, type(value), IntegerField.field_type))
         #return True if type(value) is StringField.field_type else False
         if not type(value) is IntegerField.field_type:
             raise Exception("Value {0} is type {1} but should be type {2}".format(value, type(value), IntegerField.field_type))

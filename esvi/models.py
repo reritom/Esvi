@@ -9,11 +9,19 @@ class EsviModel():
         # Initialise the fields
         self.fields = dict()
 
+        # Primary Key flag
+        pk_flag = False
+
         # Here we grab any fields from the child class attributes
         for value in dir(self.__class__):
             class_attribute = getattr(self.__class__, value)
             if hasattr(class_attribute, '__class__') and class_attribute.__class__.__base__ == fields.BaseField:
                 self.fields[value] = class_attribute
+                if class_attribute.__class__ == fields.PrimaryKey:
+                    pk_flag = True
+
+        if not pk_flag:
+            raise Exception("Model {0} is missing a primary key field".format(self.name))
 
         # Initialise the content
         self.content = dict()
@@ -33,7 +41,8 @@ class EsviModel():
             else:
                 raise Exception(field_name + " missing as parameter and has no default")
 
-
+        # Any updates to the fields are stored here before being saved
+        self._staged_changes = set()
 
     def get_json(self):
         print(self.content)
@@ -42,9 +51,25 @@ class EsviModel():
         print(self.fields)
 
     def set(self, field, value):
-        pass
+        if field not in self.fields:
+            raise Exception("Attempting to set invalid field {0} for model {1}".format(field, self.name))
+
+        self.fields[field].validate(value)
+        self.content[field] = value
+        self._staged_changes.add(field)
+
 
     def get(self, field):
+        if field not in self.fields:
+            raise Exception("Attempting to get invalid field {0} for model {1}".format(field, self.name))
+
+        return self.content[field]
+
+    def save(self):
+        print("Saving the {0}, there are changes to fields {1}".format(self.name, self._staged_changes))
+
+    @staticmethod
+    def create():
         pass
 
     @staticmethod
@@ -57,8 +82,4 @@ class EsviModel():
 
     @staticmethod
     def filter():
-        pass
-
-    @staticmethod
-    def create():
         pass

@@ -22,4 +22,9 @@ if __name__=='__main__':
     contact.get_fields()
     contact.get_json()
 
+    contact.set('age', 20)
+    contact.get_json()
+    print(contact._staged_changes)
+    contact.save()
+
     message = Message()
