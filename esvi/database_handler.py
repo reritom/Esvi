@@ -1,3 +1,4 @@
+from esvi.connection import Connection
 import os, json, uuid, datetime, time
 
 class DatabaseHandler():
@@ -9,39 +10,6 @@ class DatabaseHandler():
     def __exit__(self, exc_type, exc_value, traceback):
         print("Exiting ESVI")
 
-    def _lock(self):
-        lock_path = os.path.join(self.this_dir, '.esvi.lock')
-        if os.path.isfile(lock_path):
-            with open(lock_path, 'r') as f:
-                lock_file = f.read()
-
-            try:
-                lock_file = json.loads(lock_file)
-            except:
-                print("Failed to read lock json")
-            return
-
-            # Here we will check if there has been a timeout
-
-        self.session_id = str(uuid.uuid4())
-
-        lock_bom = {'locked_at': datetime.datetime.now().isoformat(),
-                    'locked_by': self.session_id,
-                    'db_identifier': self.db_path}
-
-        with open(lock_path, 'w') as f:
-            f.write(json.dumps(lock_bom))
-
-    def _unlock(self):
-        lock_path = os.path.join(self.this_dir, '.esvi.lock')
-        if os.path.isfile(lock_path):
-            with open(lock_path, 'r') as f:
-                lock_file = f.read()
-
-            lock_bom = json.loads(lock_file)
-
-            if lock_bom.get('locked_by', None) == self.session_id:
-                os.remove(lock_path)
 
     def __init__(self):
         """
@@ -67,8 +35,11 @@ class DatabaseHandler():
         Initialise an empty db
         """
         if os.path.isfile(path):
+            self.db_path = path
             print("DB already exists")
             return
+
+        print(path)
 
         self.db_path = path
 
@@ -76,6 +47,12 @@ class DatabaseHandler():
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'basedb.txt'), 'r') as f:
             base = f.read()
             print("Reading the base as {0}".format(base))
+
+    def get_connection(self):
+        if not self.db_path:
+            raise Exception("No DB path")
+
+        return Connection(self.db_path)
 
     def retrieve_models(self):
         pass
@@ -86,11 +63,6 @@ class DatabaseHandler():
     def delete_model(self):
         pass
 
-
-
-
-
-        pass
 
     @staticmethod
     def check_integrity(db_path):

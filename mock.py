@@ -11,10 +11,10 @@ contact = Contact().create(name='Jack',
                            contact_id="xxx-xxx-xxx")
 
 # Retrieve all
-contacts = Contact().retrieve_all()
+contacts = Contact.handler.retrieve_all()
 
 # Retrieve one using the primary key
-contact = Contact().retrieve(contact_id="xxx-xxx-xxx")
+contact = Contact.handler.retrieve(contact_id="xxx-xxx-xxx")
 
 # Retrieve all for given criteria
-contact = Contact().filter(age=lessthan(20), height=equalto(40), weight=greaterthan(60))
+contact = Contact.handler.filter(age=lessthan(20), height=equalto(40), weight=greaterthan(60))

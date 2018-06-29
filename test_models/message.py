@@ -1,6 +1,6 @@
-from esvi import models
+from esvi import model
 from esvi import fields
 
-class Message(models.EsviModel):
+class Message(model.Model):
 
     message_id = fields.PrimaryKey(default=20)
