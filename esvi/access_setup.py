@@ -7,4 +7,7 @@ def setup_database():
     handler = DatabaseHandler()
     handler.create_db(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test.esvi'))
 
-    return handler.get_connection()
+    global esvi_cnx
+    esvi_cnx = handler.get_connection()
+
+    return esvi_cnx
