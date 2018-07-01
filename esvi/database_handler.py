@@ -47,6 +47,9 @@ class DatabaseHandler():
             print("Reading the base as {0}".format(base))
 
     def format_db(self):
+        """
+        This is for formatting the mocked XML db so it doesn't have whitespace between elements
+        """
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'basedb.xml'), 'r') as f:
             base = f.read()
 
@@ -57,31 +60,21 @@ class DatabaseHandler():
         with open(os.path.join(self.this_dir, 'formatted.xml'), 'wb') as f:
             f.write(etree.tostring(elem))
 
+    def get_formatted_path(self):
+        return os.path.join(self.this_dir, 'formatted.xml')
+
     def read_formatted(self):
         with open(os.path.join(self.this_dir, 'formatted.xml'), 'rb') as f:
             for i in range(10):
                 c = f.read(1)
                 print('value {}, Position {}'.format(c, f.tell()))
-                f.seek(f.tell() +1)
+                f.seek(f.tell() + 1)
 
     def get_connection(self):
         if not self.db_path:
             raise Exception("No DB path")
 
         return Connection(self.db_path)
-
-    def retrieve_models(self):
-        pass
-
-    def add_model(self):
-        pass
-
-    def delete_model(self):
-        pass
-
-    def print_db(self):
-        pass
-
 
     @staticmethod
     def check_integrity(db_path):

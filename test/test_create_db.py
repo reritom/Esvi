@@ -1,5 +1,6 @@
 import os
 
+from esvi.database import  Database
 from esvi.database_handler import DatabaseHandler
 
 def test_create_db():
@@ -8,4 +9,6 @@ def test_create_db():
     handler.format_db()
     handler.read_formatted()
 
-    handler.print_db()
+    formatted_path = handler.get_formatted_path()
+
+    db = Database(formatted_path)

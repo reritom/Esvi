@@ -1,27 +1,59 @@
 <Database>
   <Models>
+    <size>1234</size>
     <Contact>
+      <size>123</size>
       <Definition>
-        <Field key="name" type="string" primary='true'/>
-        <Field key="age" type="int"/>
+        <size>12</size>
+        <Field>
+         <name>
+          <type>string</type>
+          <primary>true</primary>
+         </name>
+        </Field>
+        <Field>
+         <age>
+          <type>int</type>
+         </age>
+        </Field>
       </Definition>
     </Contact>
     <Message>
+      <size>123</size>
       <Definition>
-        <Field key="message_id" type="string" primary='true'/>
+        <size>12</size>
+        <Field>
+         <message_id>
+           <type>string</type>
+           <primary>true</primary>
+         </message_id>
+       </Field>
       </Definition>
     </Message>
   </Models>
   <Index>
-  <Contacts starts_at="1234" amount="2" size="200"></Contacts>
-  <Messages starts_at="4563" amount="1" size="50"></Messages>
+  <size>123</size>
+  <Contacts>
+    <begins>123</begins>
+    <amount>2</amount>
+    <size>200</size>
+  </Contacts>
+  <Messages>
+    <begins>4563</begins>
+    <amount>1</amount>
+    <size>50</size>
+  </Messages>
   </Index>
   <Contacts>
-    <Contact pk="Jack" size="34">
+    <Contact>
+      <pk>Jack</pk>
+      <size>34</size>
       <name>Jack</name>
       <age>10</age>
     </Contact>
     <Contact>
+      <pk>John</pk>
+      <size>30</size>
       <name>John</name>
       <age>5</age>
     </Contact>

@@ -19,3 +19,6 @@ class QueryExecutor():
         finally:
             print("Unlocking db")
             self.cnx._unlock()
+
+    def _get_models(self):
+        pass
