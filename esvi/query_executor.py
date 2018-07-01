@@ -1,12 +1,12 @@
-from esvi import access_setup
+from esvi import database_handler
 
 class QueryExecutor():
     def __init__(self):
 
-        if not 'esvi_cnx' in dir(access_setup):
+        if not 'esvi_cnx' in dir(database_handler):
             raise Exception("No DB connection object globalised")
 
-        self.cnx = getattr(access_setup, 'esvi_cnx')
+        self.cnx = getattr(database_handler, 'esvi_cnx')
 
         print("Executor connection is {}".format(self.cnx))
 

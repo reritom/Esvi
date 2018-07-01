@@ -1,5 +1,4 @@
 from esvi.database_handler import DatabaseHandler
-from esvi.access_setup import setup_database
 from test.test_models.contact import Contact
 from test.test_models.message import Message
 import os, time
@@ -7,7 +6,10 @@ import os, time
 
 
 if __name__=='__main__':
-    connection = setup_database()
+
+    handler = DatabaseHandler()
+    handler.create_db(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test.esvi'))
+    handler.set_global_connection()
 
 
     print("Initial object is")

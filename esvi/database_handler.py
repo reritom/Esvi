@@ -3,14 +3,6 @@ import os, json, uuid, datetime, time
 
 class DatabaseHandler():
 
-    def __enter__(self):
-        print("Entering the ESVI context")
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        print("Exiting ESVI")
-
-
     def __init__(self):
         """
         We will search for any db at this level, else we'll set a flag requiring a manual setup
@@ -29,6 +21,11 @@ class DatabaseHandler():
 
         return None
 
+    def set_global_connection(self):
+        global esvi_cnx
+        esvi_cnx = self.get_connection()
+        print(globals())
+
     def create_db(self, path):
         """
         Check if the db already exists
@@ -44,7 +41,7 @@ class DatabaseHandler():
         self.db_path = path
 
         print("Opening the base db")
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'basedb.txt'), 'r') as f:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'basedb.xml'), 'r') as f:
             base = f.read()
             print("Reading the base as {0}".format(base))
 
