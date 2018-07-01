@@ -89,6 +89,15 @@ class Model():
         return [ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response[i]) for i in response] if response else None
 
     @classmethod
-    def filter(cls):
+    def filter(cls, **kwargs):
         Model.__new__(cls, internal=True)
+
+        filters = ['_less_or_equal',
+                   '_greater_or_equal',
+                   'equal',
+                   '_less_than',
+                   '_greater_than',
+                   'between_inc',
+                   'between',
+                   'not']
         pass

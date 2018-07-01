@@ -2,13 +2,13 @@
   <Models>
     <Contact>
       <Definition>
-        <Field key="name" type="string" primary=true>
-        <Field key="age" type="int">
+        <Field key="name" type="string" primary='true'/>
+        <Field key="age" type="int"/>
       </Definition>
     </Contact>
     <Message>
       <Definition>
-        <Field key="message_id" type="string" primary=true></Field>
+        <Field key="message_id" type="string" primary='true'/>
       </Definition>
     </Message>
   </Models>
@@ -20,10 +20,10 @@
     <Contact pk="Jack" size="34">
       <name>Jack</name>
       <age>10</age>
-    <Contact>
+    </Contact>
     <Contact>
       <name>John</name>
       <age>5</age>
-    <Contact>
+    </Contact>
   </Contacts>
 </Database>

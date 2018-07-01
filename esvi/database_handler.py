@@ -1,5 +1,6 @@
 from esvi.connection import Connection
 import os, json, uuid, datetime, time
+from lxml import etree
 
 class DatabaseHandler():
 
@@ -45,6 +46,24 @@ class DatabaseHandler():
             base = f.read()
             print("Reading the base as {0}".format(base))
 
+    def format_db(self):
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'basedb.xml'), 'r') as f:
+            base = f.read()
+
+        parser = etree.XMLParser(remove_blank_text=True)
+        elem = etree.XML(base, parser=parser)
+        print(etree.tostring(elem))
+
+        with open(os.path.join(self.this_dir, 'formatted.xml'), 'wb') as f:
+            f.write(etree.tostring(elem))
+
+    def read_formatted(self):
+        with open(os.path.join(self.this_dir, 'formatted.xml'), 'rb') as f:
+            for i in range(10):
+                c = f.read(1)
+                print('value {}, Position {}'.format(c, f.tell()))
+                f.seek(f.tell() +1)
+
     def get_connection(self):
         if not self.db_path:
             raise Exception("No DB path")
@@ -58,6 +77,9 @@ class DatabaseHandler():
         pass
 
     def delete_model(self):
+        pass
+
+    def print_db(self):
         pass
 
 

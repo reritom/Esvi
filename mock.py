@@ -7,14 +7,14 @@ from models.contact import Contact
 
 # Create a contact
 contact = Contact.create(name='Jack',
-                           message=message.models.retrieve(message_id='yyy-yyy-yyy'),
+                           message=Message.retrieve(message_id='yyy-yyy-yyy'),
                            contact_id="xxx-xxx-xxx")
 
 # Retrieve all
-contacts = Contact.handler.retrieve_all()
+contacts = Contact.retrieve_all()
 
 # Retrieve one using the primary key
-contact = Contact.handler.retrieve(contact_id="xxx-xxx-xxx")
+contact = Contact.retrieve(contact_id="xxx-xxx-xxx")
 
 # Retrieve all for given criteria
-contact = Contact.handler.filter(age=lessthan(20), height=equalto(40), weight=greaterthan(60))
+contact = Contact.filter(age_between_inc=(20,30), height_less_or_equal=40, weight=greaterthan(60))
