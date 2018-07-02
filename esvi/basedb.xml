@@ -1,10 +1,10 @@
 <Database>
   <Models>
-    <size>1234</size>
+    <Size>1234</Size>
     <Contact>
-      <size>123</size>
+      <Size>123</Size>
       <Definition>
-        <size>12</size>
+        <Size>12</Size>
         <Field>
          <name>
           <type>string</type>
@@ -19,9 +19,9 @@
       </Definition>
     </Contact>
     <Message>
-      <size>123</size>
+      <Size>123</Size>
       <Definition>
-        <size>12</size>
+        <Size>12</Size>
         <Field>
          <message_id>
            <type>string</type>
@@ -32,28 +32,28 @@
     </Message>
   </Models>
   <Index>
-  <size>123</size>
+  <Size>123</Size>
   <Contacts>
     <begins>123</begins>
     <amount>2</amount>
-    <size>200</size>
+    <Size>200</Size>
   </Contacts>
   <Messages>
     <begins>4563</begins>
     <amount>1</amount>
-    <size>50</size>
+    <Size>50</Size>
   </Messages>
   </Index>
   <Contacts>
     <Contact>
       <pk>Jack</pk>
-      <size>34</size>
+      <Size>34</Size>
       <name>Jack</name>
       <age>10</age>
     </Contact>
     <Contact>
       <pk>John</pk>
-      <size>30</size>
+      <Size>30</Size>
       <name>John</name>
       <age>5</age>
     </Contact>
