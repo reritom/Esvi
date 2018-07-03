@@ -1,5 +1,7 @@
 class ModelInstance():
     def __init__(self, model_name, model_fields, model_content):
+        # # TODO: I need to initiliase it with the primary key for committing
+
         self.name = model_name
         self.fields = model_fields
         self.content = model_content

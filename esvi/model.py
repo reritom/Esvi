@@ -38,13 +38,14 @@ class Model():
             raise Exception("Model {0} is missing a primary key field".format(cls.model_name))
 
         cls.child_retrieved = True
+
+        cls.executor = QueryExecutor()
         return cls
 
 
     @classmethod
     def get_fields(cls):
         Model.__new__(cls, internal=True)
-        print(cls.model_fields)
         return cls.model_fields
 
     @classmethod
@@ -68,24 +69,21 @@ class Model():
 
         # Here we create the query and pass it to the executor
         query = Query(model_name=cls.model_name, action="create", content=content)
-        executor = QueryExecutor()
-        response = executor.execute(query)
+        response = cls.executor.execute(query)
         return ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response) if response else None
 
     @classmethod
     def retrieve(cls, primary_key_value):
         Model.__new__(cls, internal=True)
         query = Query(model_name=cls.model_name, action="retrieve", content=primary_key_value)
-        executor = QueryExecutor()
-        response = executor.execute(query)
+        response = cls.executor.execute(query)
         return ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response) if response else None
 
     @classmethod
     def retrieve_all(cls):
         Model.__new__(cls, internal=True)
         query = Query(model_name=cls.model_name, action="retrieve", content=None)
-        executor = QueryExecutor()
-        response = executor.execute(query)
+        response = cls.executor.execute(query)
         return [ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response[i]) for i in response] if response else None
 
     @classmethod
