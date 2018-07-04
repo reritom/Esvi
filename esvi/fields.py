@@ -1,6 +1,7 @@
 class BaseField():
     def __init__(self, **kwargs):
         self.default = kwargs['default'] if kwargs.get('default', False) else None
+        self.primary = False
 
     def has_default(self):
         return True if self.default is not None else False
@@ -8,8 +9,19 @@ class BaseField():
     def get_default(self):
         return self.default
 
+    def get_type(self):
+        return self.type
+
+    def is_primary(self):
+        return self.primary
+
 class PrimaryKey(BaseField):
+    type = 'STRING'
+
     def validate(self, value):
+        return True
+
+    def is_primary(self):
         return True
 
 class ForeignKey(BaseField):
@@ -18,6 +30,7 @@ class ForeignKey(BaseField):
         return True
 
 class StringField(BaseField):
+    type = 'STRING'
     field_type = str
 
     def validate(self, value):
@@ -27,6 +40,7 @@ class StringField(BaseField):
             raise Exception("Value {0} is type {1} but should be type {2}".format(value, type(value), StringField.field_type))
 
 class IntegerField(BaseField):
+    type = 'INTEGER'
     field_type = int
 
     def validate(self, value):

@@ -49,6 +49,20 @@ class Model():
         return cls.model_fields
 
     @classmethod
+    def _initialise_in_db(cls):
+        Model.__new__(cls, internal=True)
+        # Here we create the query and pass it to the executor
+        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="initialise")
+        response = cls.executor.execute(query)
+
+    @classmethod
+    def _get_defition_from_db(cls):
+        Model.__new__(cls, internal=True)
+        # Here we create the query and pass it to the executor
+        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="definition")
+        response = cls.executor.execute(query)
+
+    @classmethod
     def create(cls, **kwargs):
         Model.__new__(cls, internal=True)
 
@@ -68,21 +82,21 @@ class Model():
                 raise Exception("{} missing as parameter and has no default".format(field_name))
 
         # Here we create the query and pass it to the executor
-        query = Query(model_name=cls.model_name, action="create", content=content)
+        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="create", content=content)
         response = cls.executor.execute(query)
         return ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response) if response else None
 
     @classmethod
     def retrieve(cls, primary_key_value):
         Model.__new__(cls, internal=True)
-        query = Query(model_name=cls.model_name, action="retrieve", content=primary_key_value)
+        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="retrieve", content=primary_key_value)
         response = cls.executor.execute(query)
         return ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response) if response else None
 
     @classmethod
     def retrieve_all(cls):
         Model.__new__(cls, internal=True)
-        query = Query(model_name=cls.model_name, action="retrieve", content=None)
+        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="retrieve")
         response = cls.executor.execute(query)
         return [ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response[i]) for i in response] if response else None
 
