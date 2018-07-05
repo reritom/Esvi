@@ -16,7 +16,7 @@ class BaseField():
         return self.primary
 
 class PrimaryKey(BaseField):
-    type = 'STRING'
+    type = 'TEXT'
 
     def validate(self, value):
         return True
@@ -30,7 +30,7 @@ class ForeignKey(BaseField):
         return True
 
 class StringField(BaseField):
-    type = 'STRING'
+    type = 'TEXT'
     field_type = str
 
     def validate(self, value):

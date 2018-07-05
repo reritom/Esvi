@@ -4,7 +4,7 @@ from esvi.adapters.sqlite3_adapter import Sqlite3Adapter
 
 class QueryExecutor():
     adapters = {'esvi': EsvicoreAdapter,
-                'sqlite': Sqlite3Adapter}
+                'sqlite3': Sqlite3Adapter}
 
     def __init__(self):
         if not 'esvi_cnx' in dir(esvi_setup):
@@ -23,12 +23,13 @@ class QueryExecutor():
         Here we will route the queries to the correct adapter
         """
 
-        router = {'retrieve': self.adapter.retrieve,
-                  'create': self.adapter.create,
-                  'update': self.adapter.update,
-                  'delete': self.adapter.delete,
-                  'filter': self.adapter.filter,
-                  'initialise': self.adapter.initialise,
-                  'definition': self.adapter.get_models}
+        router = {'retrieve': self.adapter.retrieve_by_pk,
+                  'all': self.adapter.retrieve_all,
+                  'create': self.adapter.create_model,
+                  'update': self.adapter.update_model,
+                  'delete': self.adapter.delete_model,
+                  'filter': self.adapter.filter_models,
+                  'initialise': self.adapter.initialise_model,
+                  'definition': self.adapter.get_model_definition}
 
-        router[query.get_action()](query, self.cnx)
+        return router[query.get_action()](query, self.cnx)

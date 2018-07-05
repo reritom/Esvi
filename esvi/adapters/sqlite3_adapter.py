@@ -6,7 +6,7 @@ class Sqlite3Adapter():
         self.cnx = cnx
         self.db = sqlite3.connect(cnx.get_path())
 
-    def initialise(self, query, cnx):
+    def initialise_model(self, query, cnx):
         field_list = []
         print("Query fields are {}".format(query.get_fields()))
         for key, value in query.get_fields().items():
@@ -19,7 +19,7 @@ class Sqlite3Adapter():
         joined_fields = "(" + ','.join(field_list) + ")"
 
 
-        sql_query = 'CREATE TABLE {} '.format(query.get_model_name()) + joined_fields + ';'
+        sql_query = 'CREATE TABLE IF NOT EXISTS {} '.format(query.get_model_name()) + joined_fields + ';'
         print("Query is {}".format(sql_query))
 
         with sqlite3.connect(cnx.get_path()) as conn:
@@ -27,27 +27,19 @@ class Sqlite3Adapter():
         if conn:
             conn.close
 
-        # Try and retrieve
 
-        # If success, make sure the fields match our model
+    def create_model(self, query, cnx):
+        columns = self.get_model_definition(query, cnx)
 
-        # If so, continue
 
-        # Else, raise exception that a migration is needed
-
-        # if not retrieved
-
-        # Insert new model
-        pass
-
-    def create(self, query, cnx):
         base_query = 'INSERT INTO {} '.format(query.get_model_name())
 
         key_list = []
         value_list = []
 
         print("Creating model with:")
-        for key, value in query.get_content().items():
+        for key in columns:
+            value = query.get_content()[key]
             print(key, value)
             key_list.append(key)
 
@@ -62,60 +54,133 @@ class Sqlite3Adapter():
         sql_query = base_query + key_string + ' VALUES ' + value_string + ';'
         print("Query is {}".format(sql_query))
 
-        with sqlite3.connect(cnx.get_path()) as conn:
-            conn.cursor().execute(sql_query)
-            print("Model created {}".format(conn.cursor().lastrowid))
-        if conn:
-            conn.close
+        connection = sqlite3.connect(cnx.get_path())
+        cursor = connection.cursor()
+        cursor.execute(sql_query)
+        connection.commit()
+        print("Model created {}".format(cursor.lastrowid))
+        return cursor.lastrowid
 
-    def delete(self):
+    def delete_model(self):
         pass
 
-    def retrieve(self, query, cnx):
+    def retrieve_by_pk(self, query, cnx):
+        print("In retrieve_by_pk")
         for field_name, field_value in query.get_fields().items():
             if field_value.__class__ == fields.PrimaryKey:
                 pk_name = field_name
                 break
 
-        sql_query = "SELECT * FROM {table} WHERE {pk_name} = {pk_value};".format(table=query.get_model_name(),
+        sql_query = "SELECT * FROM {table} WHERE {pk_name} = '{pk_value}';".format(table=query.get_model_name(),
                                                                                  pk_name=pk_name,
                                                                                  pk_value=query.get_content())
 
-        with sqlite3.connect(cnx.get_path()) as conn:
-            conn.cursor().execute(sql_query)
-            models = conn().cursor.fetchall()
-        if conn:
-            conn.close
-
-        return models
-
-
-
-    def update(self, query):
-        def retrieve(self, query):
-            with sqlite3.connect(cnx.get_path()) as conn:
-                pass
-            if conn:
-                conn.close
-
-    def filter(self, query):
-        def retrieve(self, query):
-            with sqlite3.connect(cnx.get_path()) as conn:
-                pass
-            if conn:
-                conn.close
-
-    def get_models(self, query, cnx):
-        print("Getting models")
-        sql_query = "SELECT * FROM {table};".format(table=query.get_model_name())
         print("Query is {}".format(sql_query))
 
-        with sqlite3.connect(cnx.get_path()) as conn:
-            conn.cursor().execute(sql_query)
-            models = conn.cursor().fetchall()
-        if conn:
-            conn.close
+        connection = sqlite3.connect(cnx.get_path())
+        cursor = connection.cursor()
+        cursor.execute(sql_query)
+        model = cursor.fetchall()[0]
+        print(model)
 
+        columns = self.get_model_definition(query, cnx)
+        model_dict = {column: model[index] for index, column in enumerate(columns)}
+        return model_dict
+
+
+
+
+    def update_model(self, query, cnx):
+        columns = self.get_model_definition(query, cnx)
+
+        for field_name in query.get_fields().keys():
+            field_value = query.get_fields()[field_name]
+            if field_value.__class__ == fields.PrimaryKey:
+                pk_name = field_name
+                pk_value = query.get_content()[field_name]
+                break
+
+        base_query = 'UPDATE {} SET'.format(query.get_model_name())
+
+        key_value_list = []
+
+        print("Updating model with content {}".format(query.get_content()))
+
+        print("Updating model with:")
+
+        for key in columns:
+            print("Key is {}".format(key))
+            value = query.get_content()[key]
+            print(key, value)
+
+            if isinstance(value, str):
+                value = ("'{}'".format(value))
+            else:
+                value = str(value)
+
+            key_value_list.append('{}={}'.format(key, value))
+
+        key_value_string = ' , '.join(key_value_list)
+
+
+        if isinstance(pk_value, str):
+            pk_value = ("'{}'".format(pk_value))
+        else:
+            pk_value = str(pk_value)
+
+        sql_query = '{base_query} {key_value_string} WHERE {pk_name} = {pk_value};'.format(base_query=base_query,
+                                                                                           key_value_string=key_value_string,
+                                                                                           pk_name=pk_name,
+                                                                                           pk_value=pk_value)
+
+        print("Query is {}".format(sql_query))
+
+        connection = sqlite3.connect(cnx.get_path())
+        cursor = connection.cursor()
+        cursor.execute(sql_query)
+        models = cursor.fetchall()
+        connection.commit()
         print(models)
 
         return models
+
+
+    def filter_models(self, query, cnx):
+        pass
+
+    def get_model_definition(self, query, cnx):
+        print("In get_model_definition for {}".format(query.get_model_name()))
+        sql_query = 'PRAGMA TABLE_INFO({})'.format(query.get_model_name())
+
+        connection = sqlite3.connect(cnx.get_path())
+        cursor = connection.cursor()
+        cursor.execute(sql_query)
+        columns_tuples = cursor.fetchall()
+
+        columns = [tup[1] for tup in columns_tuples]
+        print("Columns are {}".format(columns))
+        return columns
+
+    def retrieve_all(self, query, cnx):
+        print("Getting models")
+        sql_query = "SELECT * FROM {table};".format(table=query.get_model_name())
+        print("Query is {}".format(sql_query))
+        print("Path is {}".format(cnx.get_path()))
+
+        connection = sqlite3.connect(cnx.get_path())
+        cursor = connection.cursor()
+        cursor.execute(sql_query)
+        models = cursor.fetchall()
+
+        # Models is a list of tuples, so we will convert it into a list of dictionaries
+        columns = self.get_model_definition(query, cnx)
+
+        list_of_models = []
+
+        for model in models:
+            model_dict = {column: model[index] for index, column in enumerate(columns)}
+            list_of_models.append(model_dict)
+
+        print(list_of_models)
+
+        return list_of_models

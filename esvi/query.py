@@ -1,5 +1,5 @@
 class Query():
-    supported_actions = ['retrieve', 'create', 'update', 'delete', 'initialise', 'definition']
+    supported_actions = ['retrieve', 'create', 'update', 'delete', 'initialise', 'definition', 'all']
 
     def __init__(self, model_name, model_fields, action, content=None):
         if action not in Query.supported_actions:

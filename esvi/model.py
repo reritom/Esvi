@@ -59,7 +59,7 @@ class Model():
     def _get_defition_from_db(cls):
         Model.__new__(cls, internal=True)
         # Here we create the query and pass it to the executor
-        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="definition")
+        query = Query(model_name=cls.model_name, model_fields=None, action="definition")
         response = cls.executor.execute(query)
 
     @classmethod
@@ -96,9 +96,10 @@ class Model():
     @classmethod
     def retrieve_all(cls):
         Model.__new__(cls, internal=True)
-        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="retrieve")
+        query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="all")
         response = cls.executor.execute(query)
-        return [ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response[i]) for i in response] if response else None
+        print("Retrieve all response is {}".format(response))
+        return [ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=i) for i in response] if response else None
 
     @classmethod
     def filter(cls, **kwargs):

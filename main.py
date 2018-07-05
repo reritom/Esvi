@@ -1,17 +1,17 @@
 from test.test_models.contact import Contact
 from test.test_models.message import Message
 from esvi.esvi_setup import EsviSetup
-import os, time
+import os, time, uuid
 
 
 
 if __name__=='__main__':
 
     setup = EsviSetup()
-    setup.set_database_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test.sqlite'))
+    setup.set_database_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test.sqlite3'))
     setup.set_global_connection()
 
-    #Contact._initialise_in_db()
+    Contact._initialise_in_db()
 
 
     print("Initial object is")
@@ -23,9 +23,18 @@ if __name__=='__main__':
     Contact.get_fields()
     print("New object is {}".format(Contact))
 
-    contact = Contact.create(age=15, name="Tom", contact_id="6xx")
-    contact = Contact.retrieve("6xx")
+    Contact.retrieve_all()
+
+    pk = str(uuid.uuid4())[:5]
+    print("PK is {}".format(pk))
+    contact = Contact.create(age=15, name="Tom", contact_id=pk)
+    contact = Contact.retrieve(pk)
     print("Contact object is {}".format(contact))
+
+
+    contact.set("age", 30)
+    contact.save()
+    Contact.retrieve_all()
 
 
 
