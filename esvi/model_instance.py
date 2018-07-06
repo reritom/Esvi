@@ -37,11 +37,23 @@ class ModelInstance():
 
         return self.content[field]
 
+    def pretty(self):
+        print()
+        for key, value in self.content.items():
+            print('{}: {}'.format(key, value))
+
     def save(self):
+        """
+        Update all of the rows for this model item in the db
+        """
         #fields_to_update = {key: self.content[key] for key in self._staged_changes}
         query = Query(model_name=self.model_name, model_fields=self.model_fields, action="update", content=self.content)
         response = self.executor.execute(query)
         print("Saving the {0}, there are changes to fields {1}".format(self.model_name, self._staged_changes))
 
     def delete(self):
+        """
+        Delete this model item from the DB
+        Once deleted, this model instance will be unusable
+        """
         pass

@@ -91,6 +91,7 @@ class Sqlite3Adapter():
 
 
     def update_model(self, query, cnx):
+        # Retrieve the list of column names in the correct order
         columns = self.get_model_definition(query, cnx)
 
         for field_name in query.get_fields().keys():

@@ -34,7 +34,14 @@ if __name__=='__main__':
 
     contact.set("age", 30)
     contact.save()
-    Contact.retrieve_all()
+    contacts = Contact.retrieve_all()
+    print("Lets iterate")
+    for contact in contacts:
+        contact.pretty()
+
+    print("Lets check the existance")
+    if Contact.retrieve_all().exists():
+        print("Yay it exists")
 
 
 
