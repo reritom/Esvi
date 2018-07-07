@@ -10,11 +10,6 @@ class ModelInstance():
         self.model_fields = model_fields
         self.content = model_content
 
-        # for field_name in model_fields.key():
-        #     model_fields[field_name] = field_value
-        #     if field_value.__class__ == fields.PrimaryKey:
-        #         self.__primary_key = self.content[field_name]
-
         self.__class__.__name__ = model_name + "_instance"
         self.executor = QueryExecutor()
 

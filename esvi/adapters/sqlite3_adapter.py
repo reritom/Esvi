@@ -6,7 +6,7 @@ class Sqlite3Adapter():
         self.cnx = cnx
         self.db = sqlite3.connect(cnx.get_path())
 
-    def initialise_model(self, query, cnx):
+    def initialise_model(self, query):
         field_list = []
         print("Query fields are {}".format(query.get_fields()))
         for key, value in query.get_fields().items():
@@ -22,14 +22,14 @@ class Sqlite3Adapter():
         sql_query = 'CREATE TABLE IF NOT EXISTS {} '.format(query.get_model_name()) + joined_fields + ';'
         print("Query is {}".format(sql_query))
 
-        with sqlite3.connect(cnx.get_path()) as conn:
+        with sqlite3.connect(self.cnx.get_path()) as conn:
             conn.cursor().execute(sql_query)
         if conn:
             conn.close
 
 
-    def create_model(self, query, cnx):
-        columns = self.get_model_definition(query, cnx)
+    def create_model(self, query):
+        columns = self.get_model_definition(query)
 
 
         base_query = 'INSERT INTO {} '.format(query.get_model_name())
@@ -54,7 +54,7 @@ class Sqlite3Adapter():
         sql_query = base_query + key_string + ' VALUES ' + value_string + ';'
         print("Query is {}".format(sql_query))
 
-        connection = sqlite3.connect(cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path())
         cursor = connection.cursor()
         cursor.execute(sql_query)
         connection.commit()
@@ -64,7 +64,7 @@ class Sqlite3Adapter():
     def delete_model(self):
         pass
 
-    def retrieve_by_pk(self, query, cnx):
+    def retrieve_by_pk(self, query):
         print("In retrieve_by_pk")
         for field_name, field_value in query.get_fields().items():
             if field_value.__class__ == fields.PrimaryKey:
@@ -77,22 +77,22 @@ class Sqlite3Adapter():
 
         print("Query is {}".format(sql_query))
 
-        connection = sqlite3.connect(cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path())
         cursor = connection.cursor()
         cursor.execute(sql_query)
         model = cursor.fetchall()[0]
         print(model)
 
-        columns = self.get_model_definition(query, cnx)
+        columns = self.get_model_definition(query)
         model_dict = {column: model[index] for index, column in enumerate(columns)}
         return model_dict
 
 
 
 
-    def update_model(self, query, cnx):
+    def update_model(self, query):
         # Retrieve the list of column names in the correct order
-        columns = self.get_model_definition(query, cnx)
+        columns = self.get_model_definition(query)
 
         for field_name in query.get_fields().keys():
             field_value = query.get_fields()[field_name]
@@ -136,7 +136,7 @@ class Sqlite3Adapter():
 
         print("Query is {}".format(sql_query))
 
-        connection = sqlite3.connect(cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path())
         cursor = connection.cursor()
         cursor.execute(sql_query)
         models = cursor.fetchall()
@@ -146,14 +146,14 @@ class Sqlite3Adapter():
         return models
 
 
-    def filter_models(self, query, cnx):
+    def filter_models(self, query):
         pass
 
-    def get_model_definition(self, query, cnx):
+    def get_model_definition(self, query):
         print("In get_model_definition for {}".format(query.get_model_name()))
         sql_query = 'PRAGMA TABLE_INFO({})'.format(query.get_model_name())
 
-        connection = sqlite3.connect(cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path())
         cursor = connection.cursor()
         cursor.execute(sql_query)
         columns_tuples = cursor.fetchall()
@@ -162,19 +162,19 @@ class Sqlite3Adapter():
         print("Columns are {}".format(columns))
         return columns
 
-    def retrieve_all(self, query, cnx):
+    def retrieve_all(self, query):
         print("Getting models")
         sql_query = "SELECT * FROM {table};".format(table=query.get_model_name())
         print("Query is {}".format(sql_query))
-        print("Path is {}".format(cnx.get_path()))
+        print("Path is {}".format(self.cnx.get_path()))
 
-        connection = sqlite3.connect(cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path())
         cursor = connection.cursor()
         cursor.execute(sql_query)
         models = cursor.fetchall()
 
         # Models is a list of tuples, so we will convert it into a list of dictionaries
-        columns = self.get_model_definition(query, cnx)
+        columns = self.get_model_definition(query)
 
         list_of_models = []
 

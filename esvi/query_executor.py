@@ -32,4 +32,4 @@ class QueryExecutor():
                   'initialise': self.adapter.initialise_model,
                   'definition': self.adapter.get_model_definition}
 
-        return router[query.get_action()](query, self.cnx)
+        return router[query.get_action()](query)

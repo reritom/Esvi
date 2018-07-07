@@ -112,6 +112,9 @@ class Model():
 
     @classmethod
     def retrieve_all(cls):
+        """
+        Retrieve all of the model items from the db and returns them in a model set
+        """
         Model.__new__(cls, internal=True)
         query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="all")
         response = cls.executor.execute(query)
