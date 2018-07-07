@@ -1,12 +1,13 @@
 from esvi import esvi_setup
 from esvi.adapters.esvicore_adapter import EsvicoreAdapter
 from esvi.adapters.sqlite3_adapter import Sqlite3Adapter
+from esvi.query import Query
 
 class QueryExecutor():
     adapters = {'esvi': EsvicoreAdapter,
                 'sqlite3': Sqlite3Adapter}
 
-    def __init__(self):
+    def __init__(self) -> 'QueryExecutor':
         if not 'esvi_cnx' in dir(esvi_setup):
             raise Exception("No DB connection object globalised")
 
@@ -18,7 +19,7 @@ class QueryExecutor():
 
         print("Executor connection is {}".format(self.cnx))
 
-    def execute(self, query):
+    def execute(self, query: Query):
         """
         Here we will route the queries to the correct adapter
         """

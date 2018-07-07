@@ -46,7 +46,7 @@ class Model():
 
 
     @classmethod
-    def get_fields(cls):
+    def get_fields(cls) -> dict:
         """
         Return a dictionary with the field names and their field classes
         """
@@ -54,7 +54,7 @@ class Model():
         return cls.model_fields
 
     @classmethod
-    def _initialise_in_db(cls):
+    def _initialise_in_db(cls) -> None:
         """
         This will add the model definition to the DB
         """
@@ -64,7 +64,7 @@ class Model():
         response = cls.executor.execute(query)
 
     @classmethod
-    def _get_defition_from_db(cls):
+    def _get_defition_from_db(cls) -> None:
         """
         Retrieves the model fields from the DB in a list of field names in the correct order
         """
@@ -74,7 +74,7 @@ class Model():
         response = cls.executor.execute(query)
 
     @classmethod
-    def create(cls, **kwargs):
+    def create(cls, **kwargs) -> ModelInstance:
         """
         Create a model item in the DB
         """
@@ -101,7 +101,7 @@ class Model():
         return ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response) if response else None
 
     @classmethod
-    def retrieve(cls, primary_key_value):
+    def retrieve(cls, primary_key_value) -> ModelInstance:
         """
         Retrieve a single model by primary key
         """
@@ -111,7 +111,7 @@ class Model():
         return ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response) if response else None
 
     @classmethod
-    def retrieve_all(cls):
+    def retrieve_all(cls) -> ModelSet:
         """
         Retrieve all of the model items from the db and returns them in a model set
         """
@@ -122,7 +122,7 @@ class Model():
         return ModelSet([ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=i) for i in response]) if response else None
 
     @classmethod
-    def filter(cls, **kwargs):
+    def filter(cls, **kwargs) -> ModelSet:
         Model.__new__(cls, internal=True)
 
         filters = ['_less_or_equal',

@@ -1,6 +1,6 @@
 import sqlite3, os
 
-class DBViewer():
+class Sqlite3Viewer():
     def __init__(self, db_path, cache=False):
         '''
             Initiate by creating an object for each table and creating the db connection

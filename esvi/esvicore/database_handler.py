@@ -1,5 +1,6 @@
 from esvi.connection import Connection
 import os, json, uuid, datetime, time
+from typing import Optional
 from lxml import etree
 
 class DatabaseHandler():
@@ -12,7 +13,7 @@ class DatabaseHandler():
         self.this_dir = os.path.dirname(os.path.abspath(__file__))
         self.db_path = self._discover_in_dir(self.this_dir)
 
-    def _discover_in_dir(self, dir_path):
+    def _discover_in_dir(self, dir_path: str) -> Optional[str]:
         """
         Search this dir for any esvi dbs
         """
@@ -22,12 +23,12 @@ class DatabaseHandler():
 
         return None
 
-    def set_global_connection(self):
+    def set_global_connection(self) -> None:
         global esvi_cnx
         esvi_cnx = self.get_connection()
         print(globals())
 
-    def create_db(self, path):
+    def create_db(self, path: str) -> None:
         """
         Check if the db already exists
         Initialise an empty db
@@ -46,7 +47,7 @@ class DatabaseHandler():
             base = f.read()
             print("Reading the base as {0}".format(base))
 
-    def format_db(self):
+    def format_db(self) -> None:
         """
         This is for formatting the mocked XML db so it doesn't have whitespace between elements
         """
@@ -60,7 +61,7 @@ class DatabaseHandler():
         with open(os.path.join(self.this_dir, 'formatted.xml'), 'wb') as f:
             f.write(etree.tostring(elem))
 
-    def get_formatted_path(self):
+    def get_formatted_path(self) -> str:
         return os.path.join(self.this_dir, 'formatted.xml')
 
     def read_formatted(self):
@@ -70,12 +71,12 @@ class DatabaseHandler():
                 print('value {}, Position {}'.format(c, f.tell()))
                 f.seek(f.tell() + 1)
 
-    def get_connection(self):
+    def get_connection(self) -> Connection:
         if not self.db_path:
             raise Exception("No DB path")
 
         return Connection(self.db_path)
 
     @staticmethod
-    def check_integrity(db_path):
+    def check_integrity(db_path) -> bool:
         pass

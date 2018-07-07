@@ -3,9 +3,7 @@ from esvi.query_executor import QueryExecutor
 from esvi import fields
 
 class ModelInstance():
-    def __init__(self, model_name, model_fields, model_content):
-        # # TODO: I need to initiliase it with the primary key for committing
-
+    def __init__(self, model_name: str, model_fields: dict, model_content: dict) -> 'ModelInstance':
         self.model_name = model_name
         self.model_fields = model_fields
         self.content = model_content
@@ -16,7 +14,7 @@ class ModelInstance():
         # Any updates to the fields are stored here before being saved
         self._staged_changes = set()
 
-    def set(self, field, value):
+    def set(self, field: str, value) -> None:
         if field not in self.model_fields:
             raise Exception("Attempting to set invalid field {0} for model {1}".format(field, self.model_name))
 
@@ -26,18 +24,18 @@ class ModelInstance():
         self.content[field] = value
         self._staged_changes.add(field)
 
-    def get(self, field):
+    def get(self, field: str):
         if field not in self.model_fields:
             raise Exception("Attempting to get invalid field {0} for model {1}".format(field, self.model_name))
 
         return self.content[field]
 
-    def pretty(self):
+    def pretty(self) -> None:
         print()
         for key, value in self.content.items():
             print('{}: {}'.format(key, value))
 
-    def save(self):
+    def save(self) -> bool:
         """
         Update all of the rows for this model item in the db
         """

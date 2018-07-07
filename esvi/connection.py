@@ -7,7 +7,7 @@ class Connection():
     supported_adapters = ['esvi', 'sqlite3']
 
 
-    def __init__(self, database_path):
+    def __init__(self, database_path: str) -> 'Connection':
         self.database_path = database_path
         self.database_dir = os.path.dirname(database_path)
         self.session_id = str(uuid.uuid4())
@@ -19,9 +19,9 @@ class Connection():
         self.database_type = database_path.split('.')[-1]
 
 
-    def get_path(self):
+    def get_path(self) -> str:
         return self.database_path
 
-    def get_database_type(self):
+    def get_database_type(self) -> str:
         print("DB type is {}".format(self.database_type))
         return self.database_type
