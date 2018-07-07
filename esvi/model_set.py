@@ -1,4 +1,7 @@
 class ModelSet():
+    """
+    This is an iterator for a list of Model Instances, with some additional bulk methods
+    """
     def __init__(self, models):
         self.models = models
         self.iteration_index = 0
