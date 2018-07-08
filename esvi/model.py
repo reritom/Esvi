@@ -3,6 +3,7 @@ from esvi.query import Query
 from esvi.model_instance import ModelInstance
 from esvi.query_executor import QueryExecutor
 from esvi.model_set import ModelSet
+from typing import Optional
 
 class Model():
     """
@@ -101,7 +102,7 @@ class Model():
         return ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=response) if response else None
 
     @classmethod
-    def retrieve(cls, primary_key_value) -> ModelInstance:
+    def retrieve(cls, primary_key_value) -> Optional[ModelInstance]:
         """
         Retrieve a single model by primary key
         """

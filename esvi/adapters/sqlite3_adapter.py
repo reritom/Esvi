@@ -1,5 +1,6 @@
 from esvi import fields
 from esvi.query import Query
+from typing import Optional
 import sqlite3
 
 class Sqlite3Adapter():
@@ -62,10 +63,29 @@ class Sqlite3Adapter():
         print("Model created {}".format(cursor.lastrowid))
         return cursor.lastrowid
 
-    def delete_model(self):
-        pass
+    def delete_model(self, query: Query) -> bool:
+        print("In delete_model")
+        # Determine the name and value of the primary key
+        for field_name in query.get_fields().keys():
+            field_value = query.get_fields()[field_name]
+            if field_value.__class__ == fields.PrimaryKey:
+                pk_name = field_name
+                pk_value = query.get_content()[field_name]
+                break
 
-    def retrieve_by_pk(self, query: Query) -> dict:
+        sql_query = "DELETE FROM {table} WHERE {pk_name} = '{pk_value}';".format(table=query.get_model_name(),
+                                                                              pk_name=pk_name,
+                                                                              pk_value=pk_value)
+
+        print("The query is {}".format(sql_query))
+        connection = sqlite3.connect(self.cnx.get_path())
+        cursor = connection.cursor()
+        cursor.execute(sql_query)
+        result = cursor.fetchall()
+        print("Result is {}".format(result))
+        connection.commit()
+
+    def retrieve_by_pk(self, query: Query) -> Optional[dict]:
         print("In retrieve_by_pk")
         for field_name, field_value in query.get_fields().items():
             if field_value.__class__ == fields.PrimaryKey:
@@ -81,12 +101,17 @@ class Sqlite3Adapter():
         connection = sqlite3.connect(self.cnx.get_path())
         cursor = connection.cursor()
         cursor.execute(sql_query)
-        model = cursor.fetchall()[0]
-        print(model)
+        result = cursor.fetchall()
 
-        columns = self.get_model_definition(query)
-        model_dict = {column: model[index] for index, column in enumerate(columns)}
-        return model_dict
+        if result:
+            model = result[0]
+            print(model)
+
+            columns = self.get_model_definition(query)
+            model_dict = {column: model[index] for index, column in enumerate(columns)}
+            return model_dict
+
+
 
 
 
@@ -95,6 +120,7 @@ class Sqlite3Adapter():
         # Retrieve the list of column names in the correct order
         columns = self.get_model_definition(query)
 
+        # Determine the name and value of the primary key
         for field_name in query.get_fields().keys():
             field_value = query.get_fields()[field_name]
             if field_value.__class__ == fields.PrimaryKey:
@@ -102,14 +128,8 @@ class Sqlite3Adapter():
                 pk_value = query.get_content()[field_name]
                 break
 
-        base_query = 'UPDATE {} SET'.format(query.get_model_name())
-
+        # Create list of 'key=value' strings
         key_value_list = []
-
-        print("Updating model with content {}".format(query.get_content()))
-
-        print("Updating model with:")
-
         for key in columns:
             print("Key is {}".format(key))
             value = query.get_content()[key]
@@ -130,10 +150,11 @@ class Sqlite3Adapter():
         else:
             pk_value = str(pk_value)
 
-        sql_query = '{base_query} {key_value_string} WHERE {pk_name} = {pk_value};'.format(base_query=base_query,
-                                                                                           key_value_string=key_value_string,
-                                                                                           pk_name=pk_name,
-                                                                                           pk_value=pk_value)
+        sql_query = 'UPDATE {model_name} SET {key_value_string} WHERE {pk_name} = {pk_value}'.format(model_name=query.get_model_name(),
+                                                                                                     base_query=base_query,
+                                                                                                     key_value_string=key_value_string,
+                                                                                                     pk_name=pk_name,
+                                                                                                     pk_value=pk_value)
 
         print("Query is {}".format(sql_query))
 
@@ -142,10 +163,8 @@ class Sqlite3Adapter():
         cursor.execute(sql_query)
         model = cursor.fetchall()
         connection.commit()
-        print(model)
 
         return model
-
 
     def filter_models(self, query: Query) -> list:
         pass

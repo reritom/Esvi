@@ -9,9 +9,12 @@ class Query():
 
         self.model_name = model_name
         self.action = action
-        self.fields = model_fields
-        self.content = content
 
+        # This is the definition of the model. A dict with keys being fieldnames, and values being field classes
+        self.fields = model_fields
+
+        # Content is a dict of fieldnames and their values
+        self.content = content
 
     def get_action(self) -> str:
         return self.action
