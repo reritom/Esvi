@@ -31,6 +31,10 @@ if __name__=='__main__':
     contact = Contact.retrieve(pk)
     print("Contact object is {}".format(contact))
 
+    print("Lets try and iterate over it")
+    for key in contact:
+        print(key)
+
     print("Lets try and delete this new contact")
     contact.delete()
     print("Contact deleted is {}".format(contact))

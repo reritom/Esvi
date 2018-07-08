@@ -14,6 +14,11 @@ class ModelInstance():
         # Any updates to the fields are stored here before being saved
         self._staged_changes = set()
 
+
+    def __iter__(self) -> dict:
+        # To allow iteration over the content
+        return iter(self._content)
+
     def set(self, field: str, value) -> None:
         if field not in self.__model_fields:
             raise Exception("Attempting to set invalid field {0} for model {1}".format(field, self.__model_name))
