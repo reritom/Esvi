@@ -12,7 +12,7 @@ from esvi import model
 from esvi import fields
 
 class Contact(model.Model):
-  first_name = fields.StringField()
+  first_name = fields.PrimaryKey()
   surname = fields.StringField()
   age = fields.IntegerField()
   email_address = fields.StringField(default=None) # There is also support for default values
@@ -35,7 +35,7 @@ Now, from inside your flow you can do the following:
 contact = Contact.create(first_name="Tony", surname="Stark", age=43)
 ```
 This returns a ModelInstance object which has its own set of interactions.
-The ModelInstance uses getters and setters to change its value, and then has an explicit save function for commiting the changes to the database
+The ModelInstance uses getters and setters to change its value, and then has an explicit save function for committing the changes to the database
 ```
 contact.set("age", 44)
 contact.save()
@@ -46,8 +46,35 @@ contact.delete()
 ```
 If you attempt anything with this object now, you'll raise an InstanceDeletedException.
 
+- Retrieving your models
+There are two ways to retrieve a model. You can either retrieve by primary key, or you can filter.
+When you retrieve by primary key, you just need to pass the value of your primary key to the retrieve method
+```
+contact = Contact.retrieve(primary_key="Tom")
+```
+This returns the typical ModelInstance object.
 
+However, if you wish to filter or retrieve all, then multiple models can be returned, and are therefore returned in a class called the ModelSet.
+This is simply an iterable which contains a list of ModelInstances.
+```
+all_contacts = Contact.retrieve_all() # This is a ModelSet
+
+for contact in all_contacts:
+  # contact is a ModelInstance
+  print(contact.get('name'))
+```
+The ModelSet has the method <i>exists()</i> which returns a boolean for if the ModelSet contains any ModelInstances.
+This can be used for validation.
+```
+if Contact.retrieve_all().exists():
+  # Do something
+else:
+  # We have no contacts, do something else
+```
 
 ## Things to be implemented
+- Interation of the ModelInstance fieldnames and values
 - Foreign Key support
 - Datetime field support
+- Esvicore adapter
+- Specific Exceptions
