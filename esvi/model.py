@@ -34,7 +34,7 @@ class Model():
             class_attribute = getattr(cls, value)
             if hasattr(class_attribute, '__class__') and class_attribute.__class__.__base__ == fields.BaseField:
                 cls.model_fields[value] = class_attribute
-                if class_attribute.__class__ == fields.PrimaryKey:
+                if class_attribute.is_primary():
                     pk_flag += 1
 
         if pk_flag is not 1:

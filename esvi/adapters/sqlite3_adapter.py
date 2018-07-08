@@ -8,11 +8,14 @@ class Sqlite3Adapter():
         self.cnx = cnx
         self.db = sqlite3.connect(cnx.get_path())
 
+        self.field_mapper = {'StringField': "TEXT",
+                             'IntegerField': "INTEGER"}
+
     def initialise_model(self, query: Query) -> None:
         field_list = []
         print("Query fields are {}".format(query.get_fields()))
         for key, value in query.get_fields().items():
-            field_string = "{} {}".format(key, value.get_type())
+            field_string = "{} {}".format(key, self.field_mapper[value.get_type()])
 
             if value.is_primary():
                 field_string += " PRIMARY KEY"
@@ -68,7 +71,7 @@ class Sqlite3Adapter():
         # Determine the name and value of the primary key
         for field_name in query.get_fields().keys():
             field_value = query.get_fields()[field_name]
-            if field_value.__class__ == fields.PrimaryKey:
+            if field_value.is_primary():
                 pk_name = field_name
                 pk_value = query.get_content()[field_name]
                 break
@@ -88,7 +91,7 @@ class Sqlite3Adapter():
     def retrieve_by_pk(self, query: Query) -> Optional[dict]:
         print("In retrieve_by_pk")
         for field_name, field_value in query.get_fields().items():
-            if field_value.__class__ == fields.PrimaryKey:
+            if field_value.is_primary():
                 pk_name = field_name
                 break
 
@@ -123,7 +126,7 @@ class Sqlite3Adapter():
         # Determine the name and value of the primary key
         for field_name in query.get_fields().keys():
             field_value = query.get_fields()[field_name]
-            if field_value.__class__ == fields.PrimaryKey:
+            if field_value.is_primary():
                 pk_name = field_name
                 pk_value = query.get_content()[field_name]
                 break
