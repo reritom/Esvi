@@ -120,7 +120,7 @@ class Model():
         query = Query(model_name=cls.model_name, model_fields=cls.model_fields, action="all")
         response = cls.executor.execute(query)
         print("Retrieve all response is {}".format(response))
-        return ModelSet([ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=i) for i in response]) if response else None
+        return ModelSet([ModelInstance(model_name=cls.model_name, model_fields=cls.model_fields, model_content=i) for i in response])
 
     @classmethod
     def filter(cls, **kwargs) -> ModelSet:

@@ -12,21 +12,24 @@ from esvi import model
 from esvi import fields
 
 class Contact(model.Model):
-  first_name = fields.PrimaryKey()
+  first_name = fields.StringField(primary=True)
   surname = fields.StringField()
   age = fields.IntegerField()
-  email_address = fields.StringField(default=None) # There is also support for default values
+  email_address = fields.StringField(default=None)
 ```
 
 ### Interacting with your model
-Before interacting with your model, you need to set up your database connection. For simplicitly, at the beginning of your flow, you will need to do the following:
+Before interacting with your model, you need to set up your database connection.
+For simplicitly, at the beginning of your flow, you will need to do the following:
 ```
 
 from esvi.esvi_setup import EsviSetup
 
 setup = EsviSetup()
-setup.set_database_path(<i>path_to_your_db</i>)
-setup.set_global_connection() # This creates a connection object accessible throughout the model interface, this is required
+setup.set_database_path(path_to_your_db)
+
+# This creates a connection object accessible throughout the model interface, this is required
+setup.set_global_connection()
 ```
 
 Now, from inside your flow you can do the following:
@@ -57,7 +60,8 @@ This returns the typical ModelInstance object.
 However, if you wish to filter or retrieve all, then multiple models can be returned, and are therefore returned in a class called the ModelSet.
 This is simply an iterable which contains a list of ModelInstances.
 ```
-all_contacts = Contact.retrieve_all() # This is a ModelSet
+# This is a ModelSet
+all_contacts = Contact.retrieve_all()
 
 for contact in all_contacts:
   # contact is a ModelInstance
@@ -73,7 +77,6 @@ else:
 ```
 
 ## Things to be implemented
-- Interation of the ModelInstance fieldnames and values
 - Foreign Key support
 - Datetime field support
 - Esvicore adapter
