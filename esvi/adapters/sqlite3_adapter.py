@@ -6,22 +6,50 @@ import sqlite3
 class Sqlite3Adapter():
     def __init__(self, cnx):
         self.cnx = cnx
-        self.db = sqlite3.connect(cnx.get_path())
-
-        self.field_mapper = {'StringField': "TEXT",
-                             'IntegerField': "INTEGER"}
 
     def initialise_model(self, query: Query) -> None:
         field_list = []
-        print("Query fields are {}".format(query.get_fields()))
-        for key, value in query.get_fields().items():
-            field_string = "{} {}".format(key, self.field_mapper[value.get_type()])
+        add_to_end = []  # Foreign keys need an extra bit of string added to the end
 
-            if value.is_primary():
-                field_string += " PRIMARY KEY"
+        print("Query fields are {}".format(query.get_fields()))
+
+        for key, value in query.get_fields().items():
+            is_foreign = False
+
+            if value.get_type() == "ForeignKey":
+                is_foreign = True
+
+                # It is a foreign key, so we will get the primary key of the foreign key
+                reference = value.get_reference()
+                reference_fields = reference.get_fields()
+                reference_model_name = reference.get_model_name()
+
+                for reference_field_name, reference_field in reference_fields.items():
+                    if reference_field.is_primary():
+                        # We will overwrite the key, value, with that of the reference primary key for the rest of this process
+                        key = reference_field_name
+                        value = reference_field
+                        foreign_query = 'FOREIGN KEY({key}) REFERENCES {reference_table}(id)'.format(key=key,
+                                                                                                     reference_table=reference_model_name)
+                        add_to_end.append(foreign_query)
+
+            if value.get_type() == "StringField":
+                sql_type = "TEXT"
+
+            elif value.get_type() == "IntegerField":
+                sql_type = "INTEGER"
+
+            else:
+                raise Exception("Field type not supported by adapter")
+
+            if value.is_primary() and not is_foreign:
+                sql_type += " PRIMARY KEY"
+
+
+            field_string = "{} {}".format(key, sql_type)
             field_list.append(field_string)
 
-        joined_fields = "(" + ','.join(field_list) + ")"
+        joined_fields = "(" + ','.join(field_list + add_to_end) + ")"
 
 
         sql_query = 'CREATE TABLE IF NOT EXISTS {} '.format(query.get_model_name()) + joined_fields + ';'
@@ -42,7 +70,7 @@ class Sqlite3Adapter():
         key_list = []
         value_list = []
 
-        print("Creating model with:")
+        print("Creating model with: {}".format(query.get_content()))
         for key in columns:
             value = query.get_content()[key]
             print(key, value)

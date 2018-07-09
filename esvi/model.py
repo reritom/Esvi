@@ -45,6 +45,13 @@ class Model():
         cls.executor = QueryExecutor()
         return cls
 
+    @classmethod
+    def get_model_name(cls) -> str:
+        """
+        Return the model name from the child
+        """
+        Model.__new__(cls, internal=True)
+        return cls.model_name
 
     @classmethod
     def get_fields(cls) -> dict:
@@ -89,6 +96,12 @@ class Model():
             if field_name in kwargs:
                 # Check if it is in the kwargs
                 definition.validate(kwargs[field_name])
+
+                # If it is a foreign key (the value is a ModelInstance)
+                if kwargs[field_name].__class__.__name__ == ModelInstance:
+                    # # TODO:  Something
+                    pass
+
                 content[field_name] = kwargs[field_name]
             elif definition.has_default():
                 # Check if it has a default value

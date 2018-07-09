@@ -1,9 +1,11 @@
 import datetime
 
+
 class BaseField():
     def __init__(self, default=None, primary=False):
         self.default = default
         self.primary = primary
+        self.foreign = False
 
     def has_default(self) -> bool:
         return True if self.default is not None else False
@@ -18,10 +20,25 @@ class BaseField():
         print("Type is {}".format(self.__class__.__name__))
         return self.__class__.__name__
 
+    def is_foreign(self) -> bool:
+        return self.foreign
 
 class ForeignKey(BaseField):
-    def __init__(self, default=None, primary=False):
-        super().__init__(default, primary)
+    def __init__(self, reference):
+        super().__init__()
+        self.foreign = True
+        self.reference = reference
+
+        # Lets just check that the reference is a valid model
+        from esvi.model import Model
+
+        print("mro {}".format(reference.__mro__))
+
+        if not reference.__base__ == Model:
+            raise Exception("Foreign key value isn't a model")
+
+    def get_reference(self):
+        return self.reference
 
     def validate(self, value):
         # TODO here we will validate that the value is that of an EsviModel class

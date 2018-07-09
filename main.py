@@ -1,5 +1,6 @@
 from test.test_models.contact import Contact
 from test.test_models.message import Message
+from test.test_models.recipient import Recipient
 from esvi.esvi_setup import EsviSetup
 import os, time, uuid
 
@@ -12,6 +13,8 @@ if __name__=='__main__':
     setup.set_global_connection()
 
     Contact._initialise_in_db()
+    Message._initialise_in_db()
+    Recipient._initialise_in_db()
 
 
     print("Initial object is")
@@ -19,6 +22,9 @@ if __name__=='__main__':
 
     Contact._get_defition_from_db()
 
+    message_pk = str(uuid.uuid4())[:5]
+    message = Message.create(message_id=message_pk,
+                             content="Hello world")
 
     Contact.get_fields()
     print("New object is {}".format(Contact))
@@ -31,6 +37,13 @@ if __name__=='__main__':
     contact = Contact.retrieve(pk)
     print("Contact object is {}".format(contact))
 
+
+    recipient_pk = str(uuid.uuid4())[:5]
+    recipient = Recipient.create(recipient_id=recipient_pk,
+                                 message=message,
+                                 contact=contact)
+
+    """
     print("Lets try and iterate over it")
     for key in contact:
         print(key)
@@ -42,7 +55,7 @@ if __name__=='__main__':
     contact = Contact.retrieve(pk)
     print("Contact is {}".format(contact))
 
-    """
+
 
     contact.set("age", 30)
     contact.save()

@@ -8,7 +8,7 @@ class ModelInstance():
         self.__model_fields = model_fields
         self._content = model_content
 
-        self.__class__.__name__ = model_name + "_instance"
+        #self.__class__.__name__ = model_name + "_instance"
         self.__executor = QueryExecutor()
 
         # Any updates to the fields are stored here before being saved

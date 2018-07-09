@@ -7,4 +7,3 @@ class Contact(model.Model):
     contact_id = fields.StringField(primary=True)
     name = fields.StringField()
     age = fields.IntegerField(default=0)
-    #message = fields.ForeignKey(default='EmptyMessage')
