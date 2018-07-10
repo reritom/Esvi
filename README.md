@@ -76,8 +76,38 @@ else:
   # We have no contacts, do something else
 ```
 
+- Foreign keys
+Esvi supports foreign keys.
+```
+from esvi import model
+from esvi import fields
+from test.test_models.contact import Contact
+from test.test_models.message import Message
+
+class Recipient(model.Model):
+    recipient_id = fields.StringField(primary=True)
+    address = fields.StringField()
+    contact = fields.ForeignKey(Contact)
+```
+In this example we create a Recipient model which has a Contact foreign key.
+To instantiate this model, we need to pass a contact ModelInstance (the same contact as the previous example).
+
+```
+recipient = Recipient.create(recipient_id="Something",
+                             address="Something else",
+                             contact=contact)
+```
+Now the contact can be accessed the same way as any value, and the contact attributes too.
+```
+recipient_contact = recipient.get('contact')
+
+recipient_contact_name = recipient.get('contact').get('name')
+# Or
+recipient_contact_name = recipient_contact.get('name')
+```
+
+
 ## Things to be implemented
-- Foreign Key support
 - Datetime field support
 - Esvicore adapter
 - Specific Exceptions

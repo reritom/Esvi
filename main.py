@@ -43,6 +43,8 @@ if __name__=='__main__':
                                  message=message,
                                  contact=contact)
 
+    print("Recipient contact name is {}".format(recipient.get('contact').get('name')))
+
     """
     print("Lets try and iterate over it")
     for key in contact:
