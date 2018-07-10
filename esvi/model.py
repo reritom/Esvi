@@ -35,6 +35,7 @@ class Model():
             if hasattr(class_attribute, '__class__') and class_attribute.__class__.__base__ == fields.BaseField:
                 cls.model_fields[value] = class_attribute
                 if class_attribute.is_primary():
+                    cls.primary_key = value
                     pk_flag += 1
 
         if pk_flag is not 1:
@@ -52,6 +53,14 @@ class Model():
         """
         Model.__new__(cls, internal=True)
         return cls.model_name
+
+    @classmethod
+    def get_primary_key(cls) -> str:
+        """
+        Return the model name from the child
+        """
+        Model.__new__(cls, internal=True)
+        return cls.primary_key
 
     @classmethod
     def get_fields(cls) -> dict:
@@ -96,11 +105,15 @@ class Model():
             if field_name in kwargs:
                 # Check if it is in the kwargs
                 definition.validate(kwargs[field_name])
-
+                print("Field name {} is class {}".format(field_name, kwargs[field_name].__class__.__name__))
                 # If it is a foreign key (the value is a ModelInstance)
-                if kwargs[field_name].__class__.__name__ == ModelInstance:
-                    # # TODO:  Something
-                    pass
+                if isinstance(kwargs[field_name], ModelInstance):
+                    print("Is model instance")
+                    # We convert the value to the primary key and primary value
+                    primary_key = kwargs[field_name].get_primary_key()
+                    print("Primary key is {}".format(primary_key))
+                    content[primary_key] = kwargs[field_name].get(primary_key)
+                    continue
 
                 content[field_name] = kwargs[field_name]
             elif definition.has_default():

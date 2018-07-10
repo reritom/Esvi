@@ -3,17 +3,35 @@ from esvi.query_executor import QueryExecutor
 from esvi import fields
 
 class ModelInstance():
-    def __init__(self, model_name: str, model_fields: dict, model_content: dict) -> 'ModelInstance':
+    def __init__(self, model_name: str, model_fields: dict, model_content: dict, construct_foreigns=False) -> 'ModelInstance':
         self.__model_name = model_name
         self.__model_fields = model_fields
-        self._content = model_content
+        self._content = {}
 
-        #self.__class__.__name__ = model_name + "_instance"
+        # The content contains primary keys for foreign models, so here we need to construct these foreign models
+        for model_field_name in model_fields:
+            if model_fields[model_field_name].is_foreign():
+                reference_model = model_fields[model_field_name].get_reference()
+                primary_key = reference_model.get_primary_key()
+
+                # Now we get the value for this primary key from the content and retrieve the model instance
+                retrieved_instance = reference_model.retrieve(model_content[primary_key])
+                self._content[model_field_name] = retrieved_instance
+                continue
+
+            self._content[model_field_name] = model_content[model_field_name]
+
+        print(self.__model_fields)
+        print(self._content)
         self.__executor = QueryExecutor()
 
         # Any updates to the fields are stored here before being saved
         self._staged_changes = set()
 
+    def get_primary_key(self) -> str:
+        for field_name in self.__model_fields.keys():
+            if self.__model_fields[field_name].is_primary():
+                return field_name
 
     def __iter__(self) -> dict:
         # To allow iteration over the content
@@ -33,6 +51,7 @@ class ModelInstance():
         if field not in self.__model_fields:
             raise Exception("Attempting to get invalid field {0} for model {1}".format(field, self.__model_name))
 
+        print("Getting field {} from content {}".format(field, self._content))
         return self._content[field]
 
     def pretty(self) -> None:

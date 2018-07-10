@@ -92,7 +92,8 @@ class Sqlite3Adapter():
         cursor.execute(sql_query)
         connection.commit()
         print("Model created {}".format(cursor.lastrowid))
-        return cursor.lastrowid
+        if cursor.lastrowid:
+            return query.get_content()
 
     def delete_model(self, query: Query) -> bool:
         print("In delete_model")
