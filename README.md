@@ -108,6 +108,5 @@ recipient_contact_name = recipient_contact.get('name')
 
 
 ## Things to be implemented
-- Datetime field support
 - Esvicore adapter
 - Specific Exceptions

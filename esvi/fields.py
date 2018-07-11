@@ -1,6 +1,5 @@
 import datetime
 
-
 class BaseField():
     def __init__(self, default=None, primary=False):
         self.default = default
@@ -73,4 +72,4 @@ class DateTimeField(BaseField):
         super().__init__(default, primary)
 
     def validate(self, value: datetime) -> bool:
-        return True
+        return isinstance(value, datetime.datetime)

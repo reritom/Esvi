@@ -2,6 +2,7 @@ from esvi import fields
 from esvi.query import Query
 from typing import Optional
 import sqlite3
+import datetime
 
 class Sqlite3Adapter():
     def __init__(self, cnx):
@@ -39,6 +40,9 @@ class Sqlite3Adapter():
             elif value.get_type() == "IntegerField":
                 sql_type = "INTEGER"
 
+            elif value.get_type() == "DateTimeField":
+                sql_type = "TIMESTAMP"
+
             else:
                 raise Exception("Field type not supported by adapter")
 
@@ -55,7 +59,7 @@ class Sqlite3Adapter():
         sql_query = 'CREATE TABLE IF NOT EXISTS {} '.format(query.get_model_name()) + joined_fields + ';'
         print("Query is {}".format(sql_query))
 
-        with sqlite3.connect(self.cnx.get_path()) as conn:
+        with sqlite3.connect(self.cnx.get_path(), detect_types=sqlite3.PARSE_DECLTYPES) as conn:
             conn.cursor().execute(sql_query)
         if conn:
             conn.close
@@ -76,7 +80,7 @@ class Sqlite3Adapter():
             print(key, value)
             key_list.append(key)
 
-            if isinstance(value, str):
+            if isinstance(value, str) or isinstance(value, datetime.datetime):
                 value_list.append("'{}'".format(value))
             else:
                 value_list.append(str(value))
@@ -87,7 +91,7 @@ class Sqlite3Adapter():
         sql_query = base_query + key_string + ' VALUES ' + value_string + ';'
         print("Query is {}".format(sql_query))
 
-        connection = sqlite3.connect(self.cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path(), detect_types=sqlite3.PARSE_DECLTYPES)
         cursor = connection.cursor()
         cursor.execute(sql_query)
         connection.commit()
@@ -110,7 +114,7 @@ class Sqlite3Adapter():
                                                                               pk_value=pk_value)
 
         print("The query is {}".format(sql_query))
-        connection = sqlite3.connect(self.cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path(), detect_types=sqlite3.PARSE_DECLTYPES)
         cursor = connection.cursor()
         cursor.execute(sql_query)
         result = cursor.fetchall()
@@ -130,7 +134,7 @@ class Sqlite3Adapter():
 
         print("Query is {}".format(sql_query))
 
-        connection = sqlite3.connect(self.cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path(), detect_types=sqlite3.PARSE_DECLTYPES)
         cursor = connection.cursor()
         cursor.execute(sql_query)
         result = cursor.fetchall()
@@ -190,7 +194,7 @@ class Sqlite3Adapter():
 
         print("Query is {}".format(sql_query))
 
-        connection = sqlite3.connect(self.cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path(), detect_types=sqlite3.PARSE_DECLTYPES)
         cursor = connection.cursor()
         cursor.execute(sql_query)
         model = cursor.fetchall()
@@ -220,7 +224,7 @@ class Sqlite3Adapter():
         print("Query is {}".format(sql_query))
         print("Path is {}".format(self.cnx.get_path()))
 
-        connection = sqlite3.connect(self.cnx.get_path())
+        connection = sqlite3.connect(self.cnx.get_path(), detect_types=sqlite3.PARSE_DECLTYPES)
         cursor = connection.cursor()
         cursor.execute(sql_query)
         models = cursor.fetchall()

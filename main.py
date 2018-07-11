@@ -2,7 +2,7 @@ from test.test_models.contact import Contact
 from test.test_models.message import Message
 from test.test_models.recipient import Recipient
 from esvi.esvi_setup import EsviSetup
-import os, time, uuid
+import os, time, uuid, datetime
 
 
 
@@ -24,7 +24,8 @@ if __name__=='__main__':
 
     message_pk = str(uuid.uuid4())[:5]
     message = Message.create(message_id=message_pk,
-                             content="Hello world")
+                             content="Hello world",
+                             created=datetime.datetime.now())
 
     Contact.get_fields()
     print("New object is {}".format(Contact))
@@ -44,6 +45,7 @@ if __name__=='__main__':
                                  contact=contact)
 
     print("Recipient contact name is {}".format(recipient.get('contact').get('name')))
+    print("Recipient message created at {}".format(recipient.get('message').get('created')))
 
     """
     print("Lets try and iterate over it")
