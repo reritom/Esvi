@@ -1,5 +1,6 @@
 from esvi import fields
 from esvi.query import Query
+from esvi import exceptions
 from typing import Optional
 import sqlite3
 import datetime
@@ -44,7 +45,7 @@ class Sqlite3Adapter():
                 sql_type = "TIMESTAMP"
 
             else:
-                raise Exception("Field type not supported by adapter")
+                raise exceptions.UnsupportedAdapterField()
 
             if value.is_primary() and not is_foreign:
                 sql_type += " PRIMARY KEY"

@@ -1,4 +1,5 @@
 import os, uuid, datetime, json
+from esvi import exceptions
 
 class Connection():
     """
@@ -14,7 +15,7 @@ class Connection():
 
         print("Database type {}".format(database_path.split('.')))
         if not database_path.split('.')[-1] in Connection.supported_adapters:
-            raise Exception("Unsupported database type")
+            raise exceptions.UnsupportedAdapter()
 
         self.database_type = database_path.split('.')[-1]
 

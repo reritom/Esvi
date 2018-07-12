@@ -1,4 +1,5 @@
 from esvi import esvi_setup
+from esvi import exceptions
 from esvi.adapters.esvicore_adapter import EsvicoreAdapter
 from esvi.adapters.sqlite3_adapter import Sqlite3Adapter
 from esvi.query import Query
@@ -9,7 +10,7 @@ class QueryExecutor():
 
     def __init__(self) -> 'QueryExecutor':
         if not 'esvi_cnx' in dir(esvi_setup):
-            raise Exception("No DB connection object globalised")
+            raise exceptions.UnspecifiedConnection()
 
         # Retrieve the global connection
         self.cnx = getattr(esvi_setup, 'esvi_cnx')

@@ -1,6 +1,7 @@
 from esvi.query import Query
 from esvi.query_executor import QueryExecutor
 from esvi import fields
+from esvi import exceptions
 
 class ModelInstance():
     def __init__(self, model_name: str, model_fields: dict, model_content: dict, construct_foreigns=False) -> 'ModelInstance':
@@ -39,7 +40,7 @@ class ModelInstance():
 
     def set(self, field: str, value) -> None:
         if field not in self.__model_fields:
-            raise Exception("Attempting to set invalid field {0} for model {1}".format(field, self.__model_name))
+            raise exceptions.InvalidFieldException("Attempting to set invalid field {0} for model {1}".format(field, self.__model_name))
 
         #TODO, here I need to make sure the primary key isnt being changed
 
@@ -49,7 +50,7 @@ class ModelInstance():
 
     def get(self, field: str):
         if field not in self.__model_fields:
-            raise Exception("Attempting to get invalid field {0} for model {1}".format(field, self.__model_name))
+            raise exceptions.InvalidFieldException("Attempting to get invalid field {0} for model {1}".format(field, self.__model_name))
 
         print("Getting field {} from content {}".format(field, self._content))
         return self._content[field]

@@ -13,20 +13,20 @@ if __name__=='__main__':
     setup.set_global_connection()
 
     Contact._initialise_in_db()
-    Message._initialise_in_db()
-    Recipient._initialise_in_db()
+    #Message._initialise_in_db()
+    #Recipient._initialise_in_db()
 
 
     print("Initial object is")
     print(Contact)
 
     Contact._get_defition_from_db()
-
+    '''
     message_pk = str(uuid.uuid4())[:5]
     message = Message.create(message_id=message_pk,
                              content="Hello world",
                              created=datetime.datetime.now())
-
+    '''
     Contact.get_fields()
     print("New object is {}".format(Contact))
 
@@ -36,9 +36,14 @@ if __name__=='__main__':
     print("PK is {}".format(pk))
     contact = Contact.create(age=15, name="Tom", contact_id=pk)
     contact = Contact.retrieve(pk)
+
+    try:
+        contact.get("favourite_colour")
+    except Exception as e:
+        print(e)
     print("Contact object is {}".format(contact))
 
-
+    '''
     recipient_pk = str(uuid.uuid4())[:5]
     recipient = Recipient.create(recipient_id=recipient_pk,
                                  message=message,
@@ -77,3 +82,4 @@ if __name__=='__main__':
     Message.get_fields()
     Contact.get_fields()
     """
+    '''
