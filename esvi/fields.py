@@ -1,4 +1,5 @@
 import datetime
+from esvi import fields
 
 class BaseField():
     def __init__(self, default=None, primary=False):
@@ -31,10 +32,8 @@ class ForeignKey(BaseField):
         # Lets just check that the reference is a valid model
         from esvi.model import Model
 
-        print("mro {}".format(reference.__mro__))
-
         if not reference.__base__ == Model:
-            raise Exception("Foreign key value isn't a model")
+            raise exceptions.InvalidForeignKeyDefinition()
 
     def get_reference(self):
         return self.reference

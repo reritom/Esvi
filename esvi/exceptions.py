@@ -32,3 +32,21 @@ class InvalidFieldException(Exception):
     Raised if you try and set or get a field that doesn't exist from a model instance
     """
     pass
+
+class PrimaryKeyModificationException(Exception):
+    """
+    Raised if you try and change the primary key value in a model instance
+    """
+    pass
+
+class UnsupportedQueryAction(Exception):
+    """
+    Raised if the query action value isn't in the supported list
+    """
+    pass
+
+class InvalidForeignKeyDefinition(Exception):
+    """
+    Raised if the value passed in a model definition for the foregin key isn't another model definition class
+    """
+    pass

@@ -24,6 +24,8 @@ class ModelInstance():
 
         print(self.__model_fields)
         print(self._content)
+
+        self.primary_key_name = self.get_primary_key()
         self.__executor = QueryExecutor()
 
         # Any updates to the fields are stored here before being saved
@@ -42,7 +44,8 @@ class ModelInstance():
         if field not in self.__model_fields:
             raise exceptions.InvalidFieldException("Attempting to set invalid field {0} for model {1}".format(field, self.__model_name))
 
-        #TODO, here I need to make sure the primary key isnt being changed
+        if field == self.primary_key_name:
+            raise exceptions.PrimaryKeyModificationException("Attempting to reset a primary key isn't supported")
 
         self.__model_fields[field].validate(value)
         self._content[field] = value
