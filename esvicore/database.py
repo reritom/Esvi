@@ -127,17 +127,51 @@ class Database():
         raise Exception("No immediate end tag found for size element starting at {}".format(cursor))
 
     def __update_size_elem(self, cursor, block_size):
+        """
+        For a ..
+        """
         print("Updating size elem at {}".format(cursor))
         current_size, _ = self.__read_size_elem(cursor)
         print("Current size elem is {}".format(current_size))
-        block_size_b = b'%d' % block_size
-        print("New blocksize is {}".format(block_size_b))
+        block_size_before_b = b'%d' % block_size
+        print("New blocksize is {}".format(block_size_before_b))
+
+        new_size_length_difference = len(current_size) - len(block_size_before_b)
+        block_size_after_b = b'%d' % (block_size + new_size_length_difference)
+        print("Adjusted blocksize is {}".format(block_size_after_b))
 
         with open(self.path, 'rb') as f:
             f.seek(cursor)
             print(f.read(len(Database.size_header_element)))
+            cursor_at_end_of_size_header = f.tell()
+            # The cursor is now at the end of <size>
+
+        _, here_to_end = self._get_cursor_to_end(cursor_at_end_of_size_header)
+        print(here_to_end)
+        updated_here_to_end = block_size_after_b + here_to_end[len(block_size_after_b):]
+
+        print("Updated")
+        print(updated_here_to_end)
+
+        with open(self.path, 'rb+') as f:
+            f.seek(cursor)
+            f.read(len(Database.size_header_element))
+            f.write(updated_here_to_end)
+
+        with open(self.path, 'rb') as f:
+            f.seek(cursor)
+            print(f.read())
+
+        print
+
         pass
 
+    def _get_cursor_to_end(self, cursor):
+        with open(self.path, 'rb') as f:
+            f.seek(cursor)
+            here_to_end = f.read()
+
+        return cursor, here_to_end
 
 
 
