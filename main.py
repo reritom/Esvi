@@ -43,6 +43,13 @@ if __name__=='__main__':
         print(e)
     print("Contact object is {}".format(contact))
 
+    print(contact.__dict__)
+    print(contact.name)
+    contact.name = "Harry"
+    print("New name is {}".format(contact.name))
+    contact.save()
+    print(contact._model_fields)
+
     '''
     recipient_pk = str(uuid.uuid4())[:5]
     recipient = Recipient.create(recipient_id=recipient_pk,

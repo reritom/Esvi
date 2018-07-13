@@ -188,7 +188,6 @@ class Sqlite3Adapter():
             pk_value = str(pk_value)
 
         sql_query = 'UPDATE {model_name} SET {key_value_string} WHERE {pk_name} = {pk_value}'.format(model_name=query.get_model_name(),
-                                                                                                     base_query=base_query,
                                                                                                      key_value_string=key_value_string,
                                                                                                      pk_name=pk_name,
                                                                                                      pk_value=pk_value)
