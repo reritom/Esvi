@@ -50,6 +50,15 @@ if __name__=='__main__':
     contact.save()
     print(contact._model_fields)
 
+    print(contact._deleted)
+
+    contact.delete()
+
+    try:
+        print("Trying to save deleted contact")
+        contact.save()
+    except Exception as e:
+        print("Failed to save deleted contact {}".format(e))
     '''
     recipient_pk = str(uuid.uuid4())[:5]
     recipient = Recipient.create(recipient_id=recipient_pk,

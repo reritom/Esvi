@@ -32,7 +32,9 @@ class ModelInstance(dict):
         # Any updates to the fields are stored here before being saved
         self._staged_changes = set()
 
-        # Used to allow setattr normally for all the above "sets"
+        self._deleted = False
+
+        # Used to allow setattr normally for all the above "sets" - This needs to be set at the end of init
         self._initialised = True
 
 
@@ -66,6 +68,12 @@ class ModelInstance(dict):
         """
         if not '_initialised' in self.__dict__:
             # This should only happen in init
+            super().__setattr__(field, value)
+            return
+
+        # At this point, we're passed init
+        # only _deleted can be changed at this point
+        if field == '_deleted':
             super().__setattr__(field, value)
             return
 
@@ -107,6 +115,10 @@ class ModelInstance(dict):
         """
         Update all of the rows for this model item in the db
         """
+        if self._deleted:
+            print("Raising exception")
+            raise exceptions.InstanceDeletedException("Attempting to save {} after deletion".format(self._model_name))
+
         #fields_to_update = {key: self.content[key] for key in self._staged_changes}
         query = Query(model_name=self._model_name, model_fields=self._model_fields, action="update", content=self._content)
         response = self._executor.execute(query)
@@ -119,3 +131,4 @@ class ModelInstance(dict):
         """
         query = Query(model_name=self._model_name, model_fields=self._model_fields, action="delete", content=self._content)
         response = self._executor.execute(query)
+        self._deleted = True

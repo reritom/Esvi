@@ -54,6 +54,30 @@ class StringField(BaseField):
         if not type(value) is StringField.field_type:
             raise Exception("Value {0} is type {1} but should be type {2}".format(value, type(value), StringField.field_type))
 
+class JSONField(BaseField):
+    field_type = str
+
+    def __init__(self, default=None, primary=False):
+        if primary:
+            raise exceptions.UnsupportedFieldForPrimaryKey()
+
+        super().__init__(default, primary)
+
+    def validate(self, value):
+        return True
+
+class ObjectField(BaseField):
+    field_type = str
+
+    def __init__(self, default=None, primary=False):
+        if primary:
+            raise exceptions.UnsupportedFieldForPrimaryKey()
+
+        super().__init__(default, primary)
+
+    def validate(self, value):
+        return True
+
 class IntegerField(BaseField):
     field_type = int
 
@@ -68,6 +92,9 @@ class IntegerField(BaseField):
 
 class DateTimeField(BaseField):
     def __init__(self, default=None, primary=False):
+        if primary:
+            raise exceptions.UnsupportedFieldForPrimaryKey()
+
         super().__init__(default, primary)
 
     def validate(self, value: datetime) -> bool:

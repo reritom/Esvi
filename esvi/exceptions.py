@@ -4,6 +4,12 @@ class DoesNotExist(Exception):
     """
     pass
 
+class InstanceDeletedException(Exception):
+    """
+    Raised if ModelInstance.save() is called on a deleted instance
+    """
+    pass
+
 class UnspecifiedConnection(Exception):
     """
     Raised by the query executor if a connection object hasn't be globalised
@@ -36,6 +42,12 @@ class InvalidFieldException(Exception):
 class PrimaryKeyModificationException(Exception):
     """
     Raised if you try and change the primary key value in a model instance
+    """
+    pass
+
+class UnsupportedFieldForPrimaryKey(Exception):
+    """
+    Raised if a field type which can't be a primary key is set as a primary key
     """
     pass
 
