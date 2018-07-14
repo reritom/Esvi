@@ -33,7 +33,7 @@ setup.set_global_connection()
 ```
 
 Now, from inside your flow you can do the following:
-- Create a new instance of your model
+####Create a new instance of your model
 ```
 contact = Contact.create(first_name="Tony", surname="Stark", age=43)
 ```
@@ -55,7 +55,7 @@ contact.delete()
 ```
 If you attempt anything with this object now, you'll raise an InstanceDeletedException.
 
-- Retrieving your models
+####Retrieving your models
 There are two ways to retrieve a model. You can either retrieve by primary key, or you can filter.
 When you retrieve by primary key, you just need to pass the value of your primary key to the retrieve method
 ```
@@ -82,8 +82,7 @@ else:
   # We have no contacts, do something else
 ```
 
-- Foreign keys
-
+####Foreign keys
 Esvi supports foreign keys.
 ```
 from esvi import model

@@ -1,5 +1,6 @@
 import datetime
 from esvi import fields
+from esvi import exceptions
 
 class BaseField():
     def __init__(self, default=None, primary=False):
@@ -40,7 +41,10 @@ class ForeignKey(BaseField):
 
     def validate(self, value):
         # TODO here we will validate that the value is that of an EsviModel class
-        return True
+        if not value._model_name == self.reference.model_name:
+            raise exceptions.FieldValidationException("Reference model name doesn't not match instance")
+
+
 
 class StringField(BaseField):
     field_type = str
@@ -49,13 +53,13 @@ class StringField(BaseField):
         super().__init__(default, primary)
 
     def validate(self, value: str) -> bool:
-        print("Validating stringfield, value is {0}, type is {1}, expected type is {2}".format(value, type(value), StringField.field_type))
+        print("Validating stringfield, value is {0}, type is {1}, expected type is {2}".format(value, type(value), self.field_type))
         #return True if type(value) is StringField.field_type else False
-        if not type(value) is StringField.field_type:
-            raise Exception("Value {0} is type {1} but should be type {2}".format(value, type(value), StringField.field_type))
+        if not type(value) is self.field_type:
+            raise exceptions.FieldValidationException("Value {0} is type {1} but should be type {2}".format(value, type(value), self.field_type))
 
 class JSONField(BaseField):
-    field_type = str
+    field_type = dict
 
     def __init__(self, default=None, primary=False):
         if primary:
@@ -64,19 +68,25 @@ class JSONField(BaseField):
         super().__init__(default, primary)
 
     def validate(self, value):
-        return True
+        if not type(value) is JSONField.field_type:
+            raise exceptions.FieldValidationException("Value {0} is type {1} but should be type {2}".format(value, type(value), self.field_type))
 
 class ObjectField(BaseField):
-    field_type = str
+    field_type = object
 
-    def __init__(self, default=None, primary=False):
+    def __init__(self, reference, default=None, primary=False):
         if primary:
             raise exceptions.UnsupportedFieldForPrimaryKey()
 
+        if not (hasattr(reference, 'serialise') and hasattr(reference, 'deserialise')):
+            raise exceptions.InvalidObjectFieldException("Object field object requires serialise and deserialise methods")
+
         super().__init__(default, primary)
+        self.reference = reference
 
     def validate(self, value):
-        return True
+        if not (hasattr(value, 'serialise') and hasattr(value, 'deserialise')):
+            raise exceptions.FieldValidationException("Value {0} is type {1} but should be type {2}".format(value, type(value), self.field_type))
 
 class IntegerField(BaseField):
     field_type = int
@@ -85,12 +95,14 @@ class IntegerField(BaseField):
         super().__init__(default, primary)
 
     def validate(self, value: int) -> bool:
-        print("Validating IntegerField, value is {0}, type is {1}, expected type is {2}".format(value, type(value), IntegerField.field_type))
+        print("Validating IntegerField, value is {0}, type is {1}, expected type is {2}".format(value, type(value), self.field_type))
         #return True if type(value) is StringField.field_type else False
-        if not type(value) is IntegerField.field_type:
-            raise Exception("Value {0} is type {1} but should be type {2}".format(value, type(value), IntegerField.field_type))
+        if not type(value) is self.field_type:
+            raise exceptions.FieldValidationException("Value {0} is type {1} but should be type {2}".format(value, type(value), self.field_type))
 
 class DateTimeField(BaseField):
+    field_type = datetime.datetime
+
     def __init__(self, default=None, primary=False):
         if primary:
             raise exceptions.UnsupportedFieldForPrimaryKey()
@@ -98,4 +110,5 @@ class DateTimeField(BaseField):
         super().__init__(default, primary)
 
     def validate(self, value: datetime) -> bool:
-        return isinstance(value, datetime.datetime)
+        if not isinstance(value, field_type):
+            raise exceptions.FieldValidationException("Value {0} is type {1} but should be type {2}".format(value, type(value), self.field_type))
