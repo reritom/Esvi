@@ -38,9 +38,15 @@ Now, from inside your flow you can do the following:
 contact = Contact.create(first_name="Tony", surname="Stark", age=43)
 ```
 This returns a ModelInstance object which has its own set of interactions.
-The ModelInstance uses getters and setters to change its value, and then has an explicit save function for committing the changes to the database
+The ModelInstance uses getters and setters to change its value, and then has an explicit save function for committing the changes to the database.
 ```
 contact.set("age", 44)
+contact.save()
+```
+The ModelInstance also supports dot operators for getting and setting the content.
+```
+contact.age = 15
+contact.name = "Jack"
 contact.save()
 ```
 If you are done with a ModelInstance, you can delete it from the database using delete().
@@ -77,6 +83,7 @@ else:
 ```
 
 - Foreign keys
+
 Esvi supports foreign keys.
 ```
 from esvi import model
@@ -99,11 +106,10 @@ recipient = Recipient.create(recipient_id="Something",
 ```
 Now the contact can be accessed the same way as any value, and the contact attributes too.
 ```
-recipient_contact = recipient.get('contact')
+recipient_contact = recipient.contact
 
+recipient_contact_name = recipient.contact.name
 recipient_contact_name = recipient.get('contact').get('name')
-# Or
-recipient_contact_name = recipient_contact.get('name')
 ```
 
 

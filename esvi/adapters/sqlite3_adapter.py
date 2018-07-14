@@ -148,9 +148,8 @@ class Sqlite3Adapter():
             model_dict = {column: model[index] for index, column in enumerate(columns)}
             return model_dict
 
-
-
-
+        else:
+            raise exceptions.DoesNotExist()
 
 
     def update_model(self, query: Query) -> dict:
