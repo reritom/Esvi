@@ -10,6 +10,8 @@ class ModelInstance(dict):
         self._model_fields = model_fields
         self._content = {}
 
+        print("Instance model fields are {}".format(self._model_fields))
+
         # The content contains primary keys for foreign models, so here we need to construct these foreign models
         for model_field_name in model_fields:
             if model_fields[model_field_name].is_foreign():
@@ -19,9 +21,19 @@ class ModelInstance(dict):
                 # Now we get the value for this primary key from the content and retrieve the model instance
                 retrieved_instance = reference_model.retrieve(model_content[primary_key])
                 self._content[model_field_name] = retrieved_instance
-                continue
 
-            self._content[model_field_name] = model_content[model_field_name]
+            elif model_fields[model_field_name].is_object():
+                # If the field is an object, we instanciate and deserialise it
+                reference_object = model_fields[model_field_name].get_reference()
+                print("Field is {} and reference is {}".format(model_field_name, reference_object))
+                reference_instance = reference_object()
+                print("Content is {}".format(model_content[model_field_name]))
+                print("Reference object is {}".format(reference_instance))
+                reference_instance.deserialise(model_content[model_field_name])
+                self._content[model_field_name] = reference_instance
+
+            else:
+                self._content[model_field_name] = model_content[model_field_name]
 
         print(self._model_fields)
         print(self._content)

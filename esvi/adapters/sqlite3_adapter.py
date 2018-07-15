@@ -4,6 +4,7 @@ from esvi import exceptions
 from typing import Optional
 import sqlite3
 import datetime
+import json
 
 class Sqlite3Adapter():
     def __init__(self, cnx):
@@ -44,6 +45,12 @@ class Sqlite3Adapter():
             elif value.get_type() == "DateTimeField":
                 sql_type = "TIMESTAMP"
 
+            elif value.get_type() == "ObjectField":
+                sql_type = "TEXT"
+
+            elif value.get_type() == "JSONField":
+                sql_type = "TEXT"
+
             else:
                 raise exceptions.UnsupportedAdapterField()
 
@@ -65,10 +72,69 @@ class Sqlite3Adapter():
         if conn:
             conn.close
 
+    def _encode_model(self, query: Query):
+        encoded_content = {}
+
+        for field_name, field_item in query.get_fields().items():
+            value = query.get_content()[field_name]
+
+            print("In encode, item is {}".format(field_name))
+            if field_item.get_type() == "ObjectField":
+                encoded = json.dumps(value.serialise()).replace('\'', '\"')
+                encoded_content[field_name] = "'{}'".format(encoded)
+
+            elif field_item.get_type() == "JSONField":
+                encoded = json.dumps(value).replace('\'', '\"')
+                encoded_content[field_name] = "'{}'".format(encoded)
+
+            elif field_item.get_type() == "StringField" or field_item.get_type() == "DateTimeField":
+                encoded = value
+                encoded_content[field_name] = "'{}'".format(encoded)
+            else:
+                encoded = value
+                encoded_content[field_name] = str(encoded)
+
+        return encoded_content
+
+    def _decode_model(self, sql_encoded_content: dict, query: Query) -> dict:
+        decoded_content = {}
+
+        for field_name, field_item in query.get_fields().items():
+            encoded_value = sql_encoded_content[field_name]
+
+            if field_item.get_type() == "ObjectField":
+                print("Trying to load object field {}".format(encoded_value[1:-1]))
+                decoded = json.loads(encoded_value[1:-1])
+                decoded_content[field_name] = decoded
+
+            elif field_item.get_type() == "JSONField":
+                print("Trying to load json field {}".format(encoded_value[1:-1]))
+                decoded = json.loads(encoded_value[1:-1])
+                decoded_content[field_name] = decoded
+
+            elif field_item.get_type() == "StringField":
+                decoded = encoded_value[1:-1]
+                decoded_content[field_name] = decoded
+
+            elif field_item.get_type() == "DateTimeField":
+                decoded = encoded_value[1:-1]
+                decoded_content[field_name] = decoded
+                # TODO, return datetime object
+
+            elif field_item.get_type() == "IntegerField":
+                decoded = int(encoded_value)
+                decoded_content[field_name] = decoded
+
+            else:
+                raise Exception("Unsupported field type")
+
+        return decoded_content
+
 
     def create_model(self, query: Query) -> str:
-        columns = self.get_model_definition(query)
+        sql_encoded_content = self._encode_model(query)
 
+        columns = self.get_model_definition(query)
 
         base_query = 'INSERT INTO {} '.format(query.get_model_name())
 
@@ -77,14 +143,10 @@ class Sqlite3Adapter():
 
         print("Creating model with: {}".format(query.get_content()))
         for key in columns:
-            value = query.get_content()[key]
+            value = sql_encoded_content[key]
             print(key, value)
             key_list.append(key)
-
-            if isinstance(value, str) or isinstance(value, datetime.datetime):
-                value_list.append("'{}'".format(value))
-            else:
-                value_list.append(str(value))
+            value_list.append(value)
 
         key_string = "(" + ' , '.join(key_list) + ")"
         value_string = "(" + ' , '.join(value_list) + ")"
@@ -98,7 +160,7 @@ class Sqlite3Adapter():
         connection.commit()
         print("Model created {}".format(cursor.lastrowid))
         if cursor.lastrowid:
-            return query.get_content()
+            return self._decode_model(sql_encoded_content, query)
 
     def delete_model(self, query: Query) -> bool:
         print("In delete_model")
@@ -146,7 +208,7 @@ class Sqlite3Adapter():
 
             columns = self.get_model_definition(query)
             model_dict = {column: model[index] for index, column in enumerate(columns)}
-            return model_dict
+            return self._decode_model(model_dict, query)
 
         else:
             raise exceptions.DoesNotExist()
@@ -156,35 +218,27 @@ class Sqlite3Adapter():
         # Retrieve the list of column names in the correct order
         columns = self.get_model_definition(query)
 
-        # Determine the name and value of the primary key
+        # Determine the name of the primary key
         for field_name in query.get_fields().keys():
             field_value = query.get_fields()[field_name]
             if field_value.is_primary():
                 pk_name = field_name
-                pk_value = query.get_content()[field_name]
                 break
+
+        # Encode the content into an SQL format
+        sql_encoded_content = self._encode_model(query)
 
         # Create list of 'key=value' strings
         key_value_list = []
         for key in columns:
             print("Key is {}".format(key))
-            value = query.get_content()[key]
+            value = sql_encoded_content[key]
             print(key, value)
-
-            if isinstance(value, str):
-                value = ("'{}'".format(value))
-            else:
-                value = str(value)
 
             key_value_list.append('{}={}'.format(key, value))
 
         key_value_string = ' , '.join(key_value_list)
-
-
-        if isinstance(pk_value, str):
-            pk_value = ("'{}'".format(pk_value))
-        else:
-            pk_value = str(pk_value)
+        pk_value = sql_encoded_content[pk_name]
 
         sql_query = 'UPDATE {model_name} SET {key_value_string} WHERE {pk_name} = {pk_value}'.format(model_name=query.get_model_name(),
                                                                                                      key_value_string=key_value_string,
@@ -196,10 +250,11 @@ class Sqlite3Adapter():
         connection = sqlite3.connect(self.cnx.get_path(), detect_types=sqlite3.PARSE_DECLTYPES)
         cursor = connection.cursor()
         cursor.execute(sql_query)
-        model = cursor.fetchall()
         connection.commit()
-
-        return model
+        if cursor.rowcount:
+            return self._decode_model(sql_encoded_content, query)
+        else:
+            raise Exception("Model update failed")
 
     def filter_models(self, query: Query) -> list:
         pass
@@ -235,7 +290,8 @@ class Sqlite3Adapter():
 
         for model in models:
             model_dict = {column: model[index] for index, column in enumerate(columns)}
-            list_of_models.append(model_dict)
+            decoded_dict = self._decode_model(model_dict, query)
+            list_of_models.append(decoded_dict)
 
         print(list_of_models)
 

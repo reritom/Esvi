@@ -1,6 +1,8 @@
 from test.test_models.contact import Contact
 from test.test_models.message import Message
 from test.test_models.recipient import Recipient
+from test.test_models.random import RandomModel
+from test.test_models.test_objects.car import Car
 from esvi.esvi_setup import EsviSetup
 import os, time, uuid, datetime
 
@@ -12,53 +14,68 @@ if __name__=='__main__':
     setup.set_database_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test.sqlite3'))
     setup.set_global_connection()
 
-    Contact._initialise_in_db()
+    RandomModel._initialise_in_db()
+
+    car = Car()
+
+    random_model = RandomModel.create(time=datetime.datetime.now(),
+                                      id_field=str(uuid.uuid4()),
+                                      number=5,
+                                      obj=car,
+                                      json_field={"Hello":"World"})
+
+    random_model.json_field.update({"Been": "Updated"})
+    random_model.obj.colour = "Green"
+    random_model.save()
+
+    #Contact._initialise_in_db()
     #Message._initialise_in_db()
     #Recipient._initialise_in_db()
 
 
-    print("Initial object is")
+    #print("Initial object is")
     print(Contact)
 
-    Contact._get_defition_from_db()
+    #Contact._get_defition_from_db()
     '''
     message_pk = str(uuid.uuid4())[:5]
     message = Message.create(message_id=message_pk,
                              content="Hello world",
                              created=datetime.datetime.now())
     '''
-    Contact.get_fields()
-    print("New object is {}".format(Contact))
+    #Contact.get_fields()
+    #print("New object is {}".format(Contact))
 
-    Contact.retrieve_all()
+    #Contact.retrieve_all()
 
-    pk = str(uuid.uuid4())[:5]
-    print("PK is {}".format(pk))
-    contact = Contact.create(age=15, name="Tom", contact_id=pk)
-    contact = Contact.retrieve(pk)
+    #pk = str(uuid.uuid4())[:5]
+    #print("PK is {}".format(pk))
+    #contact = Contact.create(age=15, name="Tom", contact_id=pk)
+    #contact = Contact.retrieve(pk)
 
-    try:
-        contact.get("favourite_colour")
-    except Exception as e:
-        print(e)
-    print("Contact object is {}".format(contact))
+    #try:
+    #    contact.get("favourite_colour")
+    #except Exception as e:
+    #    print(e)
+    #print("Contact object is {}".format(contact))
 
-    print(contact.__dict__)
-    print(contact.name)
-    contact.name = "Harry"
-    print("New name is {}".format(contact.name))
-    contact.save()
-    print(contact._model_fields)
+    #print(contact.__dict__)
+    #print(contact.name)
+    #contact.name = "Harry"
+    #print("New name is {}".format(contact.name))
+    #contact.save()
+    #print(contact._model_fields)
 
-    print(contact._deleted)
 
-    contact.delete()
+    #contact.delete()
 
-    try:
-        print("Trying to save deleted contact")
-        contact.save()
-    except Exception as e:
-        print("Failed to save deleted contact {}".format(e))
+    #try:
+    #    print("Trying to save deleted contact")
+    #    contact.save()
+    #except Exception as e:
+    #    print("Failed to save deleted contact {}".format(e))
+
+
     '''
     recipient_pk = str(uuid.uuid4())[:5]
     recipient = Recipient.create(recipient_id=recipient_pk,

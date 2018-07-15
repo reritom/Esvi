@@ -7,6 +7,8 @@ class BaseField():
         self.default = default
         self.primary = primary
         self.foreign = False
+        self.object = False
+        self.reference = None
 
     def has_default(self) -> bool:
         return True if self.default is not None else False
@@ -18,11 +20,16 @@ class BaseField():
         return self.primary
 
     def get_type(self) -> str:
-        print("Type is {}".format(self.__class__.__name__))
         return self.__class__.__name__
 
     def is_foreign(self) -> bool:
         return self.foreign
+
+    def is_object(self) -> bool:
+        return self.object
+
+    def get_reference(self):
+        return self.reference
 
 class ForeignKey(BaseField):
     def __init__(self, reference):
@@ -36,8 +43,6 @@ class ForeignKey(BaseField):
         if not reference.__base__ == Model:
             raise exceptions.InvalidForeignKeyDefinition()
 
-    def get_reference(self):
-        return self.reference
 
     def validate(self, value):
         # TODO here we will validate that the value is that of an EsviModel class
@@ -83,6 +88,7 @@ class ObjectField(BaseField):
 
         super().__init__(default, primary)
         self.reference = reference
+        self.object = True
 
     def validate(self, value):
         if not (hasattr(value, 'serialise') and hasattr(value, 'deserialise')):
@@ -110,5 +116,5 @@ class DateTimeField(BaseField):
         super().__init__(default, primary)
 
     def validate(self, value: datetime) -> bool:
-        if not isinstance(value, field_type):
+        if not isinstance(value, self.field_type):
             raise exceptions.FieldValidationException("Value {0} is type {1} but should be type {2}".format(value, type(value), self.field_type))
