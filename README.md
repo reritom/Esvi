@@ -18,6 +18,80 @@ class Contact(model.Model):
   email_address = fields.StringField(default=None)
 ```
 
+### Supported fields
+Esvi supports four field types:
+- IntegerField
+- StringField
+- ForeignKey
+- JSONField
+- ObjectField
+
+Most of these are what you would expect. With the IntegerField and StringField supporting being primary keys. The foreign key is initialised with another Model. The JSONField is a glorified string field which shifts the responsibility of encoding and decoding to the adapter. The ObjectField is defined with an object class as the value. Then in instantiation, you pass the relevent class instance to it. The object class is required to have a `serialise` and `deserialise` which create a dict representation of the object, and reconstruct the object from the same dict representation. It also requires that the __init__ has all optional parameters.
+
+### The ObjectField
+The other fields are self explanatory, but the ObjectField requires a bit more explanation. The following is a simple example.
+
+Consider a class, Car. The car can be instantiated perhaps with colour, size, max_speed, etc. Which would look like the following.
+
+```
+class Car():
+  def __init__(self, colour, speed, size):
+    self.speed = speed
+    self.colour = colour
+    self.size = size
+
+  def set_speed(self, value):
+    self.speed = value
+```
+
+To have this class useable in the ObjectField we would have to add the following:
+
+```
+class Car():
+  def __init__(self, colour=None, speed=None, size=None):
+    self.speed = speed
+    self.colour = colour
+    self.size = size
+
+  def set_speed(self, value):
+    self.speed = value
+
+  def serialise(self):
+    return {'speed': self.speed,
+            'colour': self.colour,
+            'size': self.size}
+
+  def deserialise(self, bom):
+    self.speed = bom.get('speed')
+    self.colour = bom.get('colour')
+    self.size = bom.get('size')
+
+```
+ And this would be then used as follows:
+
+```
+import Car
+from esvi import model
+
+class RandomModel(model.Model):
+  random_value = fields.IntegerField()
+  car_thing = fields.ObjectField(Car)
+```
+
+And could be created like so:
+```
+car = Car('Red', 15, 100)
+
+new_random_model = RandomModel.create(random_value=20,
+                                      car_thing=car)
+
+# And you can then access the car attributes as normal
+new_random_model.car_thing.set_speed(20)
+```
+
+
+In most cases, the ObjectField can be avoided by using a ForeignKey to another model. But sometimes the object may be too minor to warrant a new table or equivalent.
+
 ### Interacting with your model
 Before interacting with your model, you need to set up your database connection.
 For simplicitly, at the beginning of your flow, you will need to do the following:
@@ -33,7 +107,7 @@ setup.set_global_connection()
 ```
 
 Now, from inside your flow you can do the following:
-####Create a new instance of your model
+### Create a new instance of your model
 ```
 contact = Contact.create(first_name="Tony", surname="Stark", age=43)
 ```
@@ -55,7 +129,7 @@ contact.delete()
 ```
 If you attempt anything with this object now, you'll raise an InstanceDeletedException.
 
-####Retrieving your models
+### Retrieving your models
 There are two ways to retrieve a model. You can either retrieve by primary key, or you can filter.
 When you retrieve by primary key, you just need to pass the value of your primary key to the retrieve method
 ```
@@ -82,7 +156,7 @@ else:
   # We have no contacts, do something else
 ```
 
-####Foreign keys
+### Foreign keys
 Esvi supports foreign keys.
 ```
 from esvi import model
