@@ -12,3 +12,8 @@ if __name__=='__main__':
     '''
 
     db = Database.initialise_empty_db('new.esvi')
+    definition = {'model_name': 'Person',
+                  'fields': {'age': {'type': int, 'pk': True, 'default': 0},
+                             'name': {'type': str}}}
+
+    db.add_model_definition(definition)

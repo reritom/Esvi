@@ -4,30 +4,13 @@
     <Contact>
       <Size>123</Size>
       <Definition>
-        <Size>12</Size>
-        <Field>
-         <name>
-          <type>string</type>
-          <primary>true</primary>
-         </name>
-        </Field>
-        <Field>
-         <age>
-          <type>int</type>
-         </age>
-        </Field>
+        <name pk=true type=str default=''>
       </Definition>
     </Contact>
     <Message>
       <Size>123</Size>
       <Definition>
-        <Size>12</Size>
-        <Field>
-         <message_id>
-           <type>string</type>
-           <primary>true</primary>
-         </message_id>
-       </Field>
+         <message_id type=string pk=true>
       </Definition>
     </Message>
   </Models>
