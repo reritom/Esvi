@@ -234,8 +234,6 @@ class Database():
 
         print
 
-        pass
-
     def _get_cursor_to_end(self, cursor):
         with open(self.path, 'r') as f:
             f.seek(cursor)
@@ -254,7 +252,7 @@ class Database():
         """
         definition = {'model_name': str,
                       'fields': {'age': {'type': int, 'pk': True, 'default': 0},
-                                 'name': {'type: str}}
+                                 'name': {'type: str}}}
         """
         model_name = definition.get('model_name')
         fields = definition.get('fields')
@@ -315,12 +313,43 @@ class Database():
         return size
 
     def get_model_definition(self, model_name):
-        pass
+        start_of_models = len(Database.database_header_definition) + len(Database.models_header_definiton)
+        size_of_models, end_of_size_elem = self.__read_size_elem(start_of_models)
+
+        this_model_header = '<{}>'.format(model_name)
+        this_model_tail = '</{}>'.format(model_name)
+
+        this_model_header_buffer = 'x' * len(this_model_header)
+        this_model_tail_buffer = 'x' * len(this_model_tail)
+
+        with open(self.path, 'r') as f:
+            while True:
+                char = f.read(1)
+
+                if not char:
+                    # EOF
+                    raise Exception("End of file reached searching for {}".format(model_name))
+                    break
+
+                this_model_header_buffer = this_model_header_buffer[1:] + char
+
+                if this_model_header_buffer == this_model_header:
+                    print("Model {} found at {}".format(model_name, f.tell() - len(this_model_header)))
+                    break
+
+            this_model_size, end_of_size_elem = self.__read_size_elem(f.tell())
+            f.seek(end_of_size_elem)
+
+            print("Model is {}".format(f.read(int(this_model_size))))
 
     def remove_model_definition(self, model_name):
+        # This will remove any associated models instances too
         pass
 
     def insert_model(self, model):
+        pass
+
+    def update_model(self, model):
         pass
 
     def remove_model(self, model_pk):

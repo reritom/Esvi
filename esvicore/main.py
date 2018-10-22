@@ -17,3 +17,12 @@ if __name__=='__main__':
                              'name': {'type': str}}}
 
     db.add_model_definition(definition)
+
+    definition = {'model_name': 'Client',
+                  'fields': {'business': {'type': int, 'pk': True},
+                             'name': {'type': str},
+                             'description': {'type': str}}}
+
+    db.add_model_definition(definition)
+
+    db.get_model_definition("Client")
