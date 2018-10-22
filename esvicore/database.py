@@ -295,16 +295,24 @@ class Database():
         start_of_models = len(Database.database_header_definition) + len(Database.models_header_definiton)
         size_of_models, end_of_size_elem = self.__read_size_elem(start_of_models)
         new_size = int(size_of_models) + size_of_definition
+        new_size_elem = self._create_size_elem(new_size)
 
         print("Writing new definition")
-        start_to_here = self._get_start_to_here(end_of_size_elem)
+        start_to_beginning_of_size = self._get_start_to_here(start_of_models)
         _, rest_of_db = self._get_cursor_to_end(end_of_size_elem)
 
         with open(self.path, 'w+') as f:
-            f.write(start_to_here)
+            f.write(start_to_beginning_of_size)
+            f.write(new_size_elem)
             f.write(definition)
             f.write(rest_of_db)
 
+    def _create_size_elem(self, size):
+        size = "{}{}{}".format(Database.size_header_element,
+                               str(size),
+                               Database.size_tail_element)
+
+        return size
 
     def get_model_definition(self, model_name):
         pass
