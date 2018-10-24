@@ -18,6 +18,10 @@ class Database():
                       int: 'int',
                       bool: 'bool'}
 
+    string_to_type = {'string': str,
+                      'int': int,
+                      'bool': bool}
+
     def __init__(self, path, repair=False):
         self.path = path
         self.repair = repair
@@ -338,9 +342,96 @@ class Database():
                     break
 
             this_model_size, end_of_size_elem = self.__read_size_elem(f.tell())
-            f.seek(end_of_size_elem)
+            cursor = f.seek(end_of_size_elem)
+            definition = self._parse_definition_block(cursor)
+            print(definition)
 
-            print("Model is {}".format(f.read(int(this_model_size))))
+
+    def _parse_definition_block(self, cursor):
+        with open(self.path, 'r') as f:
+            f.seek(cursor)
+
+            if not f.read(len(Database.definition_header_definition)) == Database.definition_header_definition:
+                raise Exception("Definition header expected at {} but not found".format(end_of_size_elem))
+
+            #model_definition = f.read(int(this_model_size))[len(Database.definition_header_definition):-len(Database.definition_tail_definition)]
+            #print("Model is {}".format(model_definition))
+            end_of_definition_buffer = 'x' * len(Database.definition_tail_definition)
+
+            parsing_field_name, parsing_attribute_name, parsing_attribute_value = False, False, False
+            this_field_name, this_attribute_name, this_attribute_value = '', '', ''
+            fields = {}
+
+            print("Beginning definition parsing")
+            while True:
+                char = f.read(1)
+
+                if not char:
+                    # EOF
+                    raise Exception("End of file reached searching for {}".format(model_name))
+                    break
+
+                end_of_definition_buffer = end_of_definition_buffer[1:] + char
+
+                if end_of_definition_buffer == Database.definition_tail_definition:
+                    print("End of definition reached")
+                    break
+
+                if char == '<':
+                    # Start parsing the name
+                    print("Start parsing field name")
+                    parsing_field_name = True
+                elif char == '>':
+                    # Refresh the values because we have reached the end of this field
+                    print("Reached end of field")
+                    this_field_name = ''
+                elif parsing_field_name and char == ' ':
+                    # Reached the end of the field name, so we'll start parsing the attributes
+                    print("Creating field name")
+                    parsing_field_name = False
+                    fields[this_field_name] = {}
+                    parsing_attribute_name = True
+                elif parsing_field_name:
+                    this_field_name += char
+                    print("Field name is {}".format(this_field_name))
+                elif parsing_attribute_name and char == '=':
+                    # Reached the separator
+                    print("End of attribute {}".format(this_attribute_name))
+                    parsing_attribute_name = False
+                    parsing_attribute_value = True
+                elif parsing_attribute_name:
+                    this_attribute_name += char
+                elif parsing_attribute_value and char == ' ':
+                    # Reached end of this attribute, but not the end of all attributes
+                    fields[this_field_name][this_attribute_name] = self._render_attribute_pair(this_attribute_name, this_attribute_value)
+                    parsing_attribute_name, parsing_attribute_value = True, False
+                    this_attribute_name, this_attribute_value = '', ''
+                elif parsing_attribute_value and char == '/':
+                    # Reached end of this attribute, and all attributes for this field
+                    fields[this_field_name][this_attribute_name] = self._render_attribute_pair(this_attribute_name, this_attribute_value)
+                    parsing_field_name, parsing_attribute_name, parsing_attribute_value = False, False, False
+                    this_field_name, this_attribute_name, this_attribute_value = '', '', ''
+                elif parsing_attribute_value:
+                    this_attribute_value += char
+                else:
+                    pass
+
+        return fields
+
+    def _render_attribute_pair(self, key, value):
+        """
+        For a key and value read from the definition, convert them into the correct formats
+        """
+        value = value.strip('"')
+
+        if key == 'pk':
+            value = value in ['True', 'true']
+        elif key == 'type':
+            value = Database.string_to_type[value]
+        else:
+            pass
+
+        return value
 
     def remove_model_definition(self, model_name):
         # This will remove any associated models instances too
