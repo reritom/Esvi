@@ -4,13 +4,13 @@
     <Contact>
       <Size>123</Size>
       <Definition>
-        <name pk=true type=str default=''>
+        <name pk="True" type="str" default=" ">
       </Definition>
     </Contact>
     <Message>
       <Size>123</Size>
       <Definition>
-         <message_id type=string pk=true>
+         <message_id type="string" pk="true">
       </Definition>
     </Message>
   </Models>
@@ -27,18 +27,21 @@
     <Size>50</Size>
   </Messages>
   </Index>
-  <Contacts>
+  <Rows>
     <Contact>
-      <pk>Jack</pk>
-      <Size>34</Size>
-      <name>Jack</name>
-      <age>10</age>
+      <Size>123</Size>
+      <Row>
+        <Size>34</Size>
+        <pk>Jack</pk>
+        <name>Jack</name>
+        <age>10</age>
+      </Row>
+      <Row>
+        <Size>30</Size>
+        <pk>John</pk>
+        <name>John</name>
+        <age>5</age>
+      </Row>
     </Contact>
-    <Contact>
-      <pk>John</pk>
-      <Size>30</Size>
-      <name>John</name>
-      <age>5</age>
-    </Contact>
-  </Contacts>
+  </Rows>
 </Database>

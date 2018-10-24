@@ -438,6 +438,9 @@ class Database():
         pass
 
     def insert_model(self, model):
+        # TODO Check model matches definition
+        # TODO Find start of this model block
+        # TODO Insert
         pass
 
     def update_model(self, model):
@@ -447,6 +450,7 @@ class Database():
         pass
 
     def _check_model_fits_definition(self):
+        # TODO If no one else has touched the db, use the definitions retrieved on init
         pass
 
     @classmethod
