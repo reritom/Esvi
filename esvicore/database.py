@@ -11,6 +11,8 @@ class Database():
     size_tail_element = '</Size>'
     index_header_element = '<Index>'
     index_tail_element = '</Index>'
+    rows_header_element = '<Rows>'
+    rows_tail_element = '</Rows>'
 
     max_char_for_size = 5 # Length of size can be up to 10^this_var
 
@@ -299,15 +301,61 @@ class Database():
         new_size = int(size_of_models) + size_of_definition
         new_size_elem = self._create_size_elem(new_size)
 
+        with open(self.path, 'r') as f:
+            f.seek(end_of_size_elem)
+            existing_models = f.read(int(size_of_models))
+            print("Reading models tail as {}".format(f.read(len(Database.models_tail_definition))))
+            end_of_models = f.tell()
+
         print("Writing new definition")
         start_to_beginning_of_size = self._get_start_to_here(start_of_models)
+
+        index_tail_buffer = 'x' * len(Database.index_tail_element)
+        index_block = ''
+
+        with open(self.path, 'r') as f:
+            f.seek(end_of_models)
+            while True:
+                char = f.read(1)
+
+                if not char:
+                    raise Exception("End of file reached searching for index tail")
+
+                index_tail_buffer = index_tail_buffer[1:] + char
+                index_block += char
+
+                if index_tail_buffer == Database.index_tail_element:
+                    break
+
+            end_of_index = f.tell()
+
+        # Now we are at the end of the index, and need to add a new row body
+        new_row = '<{}>{}0{}</{}>'.format(model_name,
+                                          Database.size_header_element,
+                                          Database.size_tail_element,
+                                          model_name)
+
+        size_of_rows, end_of_size_elem = self.__read_size_elem(end_of_index + len(Database.rows_header_element))
+        new_size = int(size_of_rows) + len(new_row)
+        new_rows_size_elem = self._create_size_elem(new_size)
+
+
+        # When reading the rest, we read based on the existing stuff in the db
         _, rest_of_db = self._get_cursor_to_end(end_of_size_elem)
 
         with open(self.path, 'w+') as f:
             f.write(start_to_beginning_of_size)
             f.write(new_size_elem)
             f.write(definition)
+            f.write(existing_models)
+            f.write(Database.models_tail_definition)
+            f.write(index_block)
+            f.write(Database.rows_header_element)
+            f.write(new_rows_size_elem)
+            f.write(new_row)
             f.write(rest_of_db)
+            print("REST OF DB")
+            print(rest_of_db)
 
     def _create_size_elem(self, size):
         size = "{}{}{}".format(Database.size_header_element,
@@ -379,24 +427,24 @@ class Database():
 
                 if char == '<':
                     # Start parsing the name
-                    print("Start parsing field name")
+                    #print("Start parsing field name")
                     parsing_field_name = True
                 elif char == '>':
                     # Refresh the values because we have reached the end of this field
-                    print("Reached end of field")
+                    #print("Reached end of field")
                     this_field_name = ''
                 elif parsing_field_name and char == ' ':
                     # Reached the end of the field name, so we'll start parsing the attributes
-                    print("Creating field name")
+                    #print("Creating field name")
                     parsing_field_name = False
                     fields[this_field_name] = {}
                     parsing_attribute_name = True
                 elif parsing_field_name:
                     this_field_name += char
-                    print("Field name is {}".format(this_field_name))
+                    #print("Field name is {}".format(this_field_name))
                 elif parsing_attribute_name and char == '=':
                     # Reached the separator
-                    print("End of attribute {}".format(this_attribute_name))
+                    #print("End of attribute {}".format(this_attribute_name))
                     parsing_attribute_name = False
                     parsing_attribute_value = True
                 elif parsing_attribute_name:
