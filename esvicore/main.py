@@ -26,3 +26,9 @@ if __name__=='__main__':
     db.add_model_definition(definition)
 
     db.get_model_definition("Client")
+
+    client_instance = {'business': 1,
+                       'name': "Jacks patch",
+                       'description': "A gardening company"}
+
+    db.insert_model(model_name="Client", model_instance=client_instance)

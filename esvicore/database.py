@@ -122,57 +122,6 @@ class Database():
         print("Model block is valid")
         return start_of_model_block, end_of_size_elem, end_of_model_cursor
 
-    def get_model_definitions(self):
-        print("Getting model definitions")
-        start_of_models = len(Database.database_header_definition) + len(Database.models_header_definiton)
-        size_of_models, end_of_size_elem = self.__read_size_elem(start_of_models)
-        print("Size of models {0}".format(size_of_models))
-
-        if not size_of_models:
-            raise Exception("Size elem at {} is empty".format(start_of_models))
-
-        with open(self.path, 'r') as f:
-            f.seek(end_of_size_elem)
-            read_model_block = f.read(int(size_of_models))
-            print(read_model_block)
-            cursor = f.tell()
-            # The cursor is now at the end of the expected model definition block, we will check for the closing elem
-
-            end_of_model_definition = f.read(len(Database.models_tail_definition))
-
-        if not end_of_model_definition == Database.models_tail_definition:
-            if not self.repair:
-                raise Exception("Expected to find {} at {} but found {}".format(Database.models_tail_definition,
-                                                                            cursor - len(Database.models_tail_definition),
-                                                                            read_model_block[-len(Database.models_tail_definition):]))
-
-            else:
-                # Lets try and repair it by searching for the end tag and recalculating the size
-                new_size = 0
-                buffer = 'x' * len(Database.models_tail_definition)
-                with open(self.path, 'r') as f:
-                    f.seek(start_of_models)
-
-                    while True:
-                        char = f.read(1)
-
-                        if not char:
-                            # EOF
-                            raise Exception("End of file reached searching for {} in repair attempt".format(Database.models_tail_definition))
-                            break
-
-                        new_size += 1
-                        buffer = buffer[1:] + char
-
-                        if buffer == Database.models_tail_definition:
-                            # The closing elem has been found
-                            print("Tail definition has been found ending at {} with size {}".format(f.tell(), new_size))
-                            break
-
-                # From here will we pass the block beginning, and new block size to the size updater
-                self.__update_size_elem(start_of_models, new_size)
-
-
     def __read_size_elem(self, cursor):
         print("Reading the size elem")
         with open(self.path, 'r') as f:
@@ -201,44 +150,6 @@ class Database():
                     return buffer[:-len(Database.size_tail_element)], f.tell()
 
         raise Exception("No immediate end tag found for size element starting at {}".format(cursor))
-
-    def __update_size_elem(self, cursor, block_size):
-        """
-        For a ..
-        """
-        print("Updating size elem at {}".format(cursor))
-        current_size, _ = self.__read_size_elem(cursor)
-        print("Current size elem is {}".format(current_size))
-        block_size_before_b = '%d' % block_size
-        print("New blocksize is {}".format(block_size_before_b))
-
-        new_size_length_difference = len(current_size) - len(block_size_before_b)
-        block_size_after_b = '%d' % (block_size + new_size_length_difference)
-        print("Adjusted blocksize is {}".format(block_size_after_b))
-
-        with open(self.path, 'r') as f:
-            f.seek(cursor)
-            print(f.read(len(Database.size_header_element)))
-            cursor_at_end_of_size_header = f.tell()
-            # The cursor is now at the end of <size>
-
-        _, here_to_end = self._get_cursor_to_end(cursor_at_end_of_size_header)
-        print(here_to_end)
-        updated_here_to_end = block_size_after_b + here_to_end[len(block_size_after_b):]
-
-        print("Updated")
-        print(updated_here_to_end)
-
-        with open(self.path, 'r+') as f:
-            f.seek(cursor)
-            f.read(len(Database.size_header_element))
-            f.write(updated_here_to_end)
-
-        with open(self.path, 'r') as f:
-            f.seek(cursor)
-            print(f.read())
-
-        print
 
     def _get_cursor_to_end(self, cursor):
         with open(self.path, 'r') as f:
@@ -365,6 +276,9 @@ class Database():
         return size
 
     def get_model_definition(self, model_name):
+        if not isinstance(model_name, str):
+            raise Exception("Model name expected as str, received {}".format(type(model_name)))
+
         start_of_models = len(Database.database_header_definition) + len(Database.models_header_definiton)
         size_of_models, end_of_size_elem = self.__read_size_elem(start_of_models)
 
@@ -392,8 +306,11 @@ class Database():
             this_model_size, end_of_size_elem = self.__read_size_elem(f.tell())
             cursor = f.seek(end_of_size_elem)
             definition = self._parse_definition_block(cursor)
-            print(definition)
 
+        return {'model_name': model_name, 'fields': definition}
+
+    def _find_models_block_in_rows(self):
+        pass
 
     def _parse_definition_block(self, cursor):
         with open(self.path, 'r') as f:
@@ -485,8 +402,10 @@ class Database():
         # This will remove any associated models instances too
         pass
 
-    def insert_model(self, model):
-        # TODO Check model matches definition
+    def insert_model(self, model_name, model_instance):
+        model_definition = self.get_model_definition(model_name)
+        model_instance = self._check_model_fits_definition(model_definition, model_instance)
+
         # TODO Find start of this model block
         # TODO Insert
         pass
@@ -497,9 +416,26 @@ class Database():
     def remove_model(self, model_pk):
         pass
 
-    def _check_model_fits_definition(self):
+    def _check_model_fits_definition(self, model_definition, model_instance):
+        # Raise an exception if the model doesn't fit the definition, fill any default values otherwise
         # TODO If no one else has touched the db, use the definitions retrieved on init
-        pass
+        for key, definition in model_definition.get('fields').items():
+            if key not in model_instance and 'default' not in definition:
+                raise Exception("Model {} requires {} which has no default value".format(
+                    model_definition['model_name'],
+                    key
+                    ))
+            elif key not in model_instance:
+                model_instance[key] = definition['default']
+            else:
+                if not isinstance(model_instance[key], definition['type']):
+                    raise Exception("Key {} for model {} expected to be type {} not {}".format(
+                        key,
+                        model_definition['model_name'],
+                        definition['type'],
+                        type(model_instance[key])
+                        ))
+
 
     @classmethod
     def initialise_empty_db(cls, path):
