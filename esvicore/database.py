@@ -405,10 +405,32 @@ class Database():
     def insert_model(self, model_name, model_instance):
         model_definition = self.get_model_definition(model_name)
         model_instance = self._check_model_fits_definition(model_definition, model_instance)
+        end_of_index = self._end_of_index()
+        print("End of index {}".format(end_of_index))
 
         # TODO Find start of this model block
         # TODO Insert
         pass
+
+    def _start_of_model_rows(self, model_name):
+        end_of_index = self._end_of_index()
+        start_of_rows = end_of_index + len(Database.rows_header_element)
+
+        # Read until we find the correct header or the end of the block
+        pass
+
+    def _end_of_models(self):
+        start_of_models = len(Database.database_header_definition) + len(Database.models_header_definiton)
+        size_of_models, end_of_size_elem = self.__read_size_elem(start_of_models)
+        end_of_models = int(size_of_models) + end_of_size_elem + len(Database.models_tail_definition)
+        return end_of_models
+
+    def _end_of_index(self):
+        end_of_models = self._end_of_models()
+        start_of_index = end_of_models + len(Database.index_header_element)
+        size_of_index, end_of_size_elem = self.__read_size_elem(start_of_index)
+        end_of_index = int(size_of_index) + end_of_size_elem + len(Database.index_tail_element)
+        return end_of_index
 
     def update_model(self, model):
         pass
