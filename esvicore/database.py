@@ -13,6 +13,8 @@ class Database():
     index_tail_element = '</Index>'
     rows_header_element = '<Rows>'
     rows_tail_element = '</Rows>'
+    row_header_element = '<Row>'
+    row_tail_element = '</Row>'
 
     max_char_for_size = 5 # Length of size can be up to 10^this_var
 
@@ -404,20 +406,56 @@ class Database():
 
     def insert_model(self, model_name, model_instance):
         model_definition = self.get_model_definition(model_name)
-        model_instance = self._check_model_fits_definition(model_definition, model_instance)
-        end_of_index = self._end_of_index()
-        print("End of index {}".format(end_of_index))
+        self._check_model_fits_definition(model_definition, model_instance)
+        start_of_model_rows = self._start_of_model_rows(model_name)
+        size_of_model_rows, end_of_size_elem = self.__read_size_elem(start_of_model_rows)
 
-        # TODO Find start of this model block
-        # TODO Insert
-        pass
+        print("Start of model rows {}".format(start_of_model_rows))
+        start_to_here = self._get_start_to_here(start_of_model_rows)
+        model_string = ''.join(['<{key}>{value}</{key}>'.format(key=key, value=value)
+                               for key, value
+                               in model_instance.items()])
+        model_string = Database.row_header_element + model_string + Database.row_tail_element
+
+        new_size_elem = self._create_size_elem(int(size_of_model_rows) + len(model_string))
+        _, here_to_end = self._get_cursor_to_end(end_of_size_elem)
+
+        with open(self.path, 'w') as f:
+            print(start_to_here)
+            f.write(start_to_here)
+            print(new_size_elem)
+            f.write(new_size_elem)
+            print(model_string)
+            f.write(model_string)
+            print(here_to_end)
+            f.write(here_to_end)
 
     def _start_of_model_rows(self, model_name):
+        # Return the cursor for the beginning of the model rows (after the header)
+
         end_of_index = self._end_of_index()
         start_of_rows = end_of_index + len(Database.rows_header_element)
+        model_header = "<{}>".format(model_name)
 
-        # Read until we find the correct header or the end of the block
-        pass
+        buffer = 'x' * len(model_header)
+
+        with open(self.path, 'r') as f:
+            f.seek(start_of_rows)
+            # Read until we find the correct header or the end of the block
+            while True:
+                char = f.read(1)
+
+                if not char:
+                    # EOF
+                    raise Exception("End of file reached searching for {} rows beginning".format(model_name))
+
+                buffer = buffer[1:] + char
+
+                if buffer == model_header:
+                    break
+
+            return f.tell()
+
 
     def _end_of_models(self):
         start_of_models = len(Database.database_header_definition) + len(Database.models_header_definiton)
@@ -457,7 +495,6 @@ class Database():
                         definition['type'],
                         type(model_instance[key])
                         ))
-
 
     @classmethod
     def initialise_empty_db(cls, path):
