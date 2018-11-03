@@ -402,6 +402,40 @@ class Database():
         # This will remove any associated models instances too
         pass
 
+    def get_all_given_models(self, model_name):
+        model_definition = self.get_model_definition(model_name)
+        start_of_model_rows = self._start_of_model_rows(model_name=model_name)
+        print("Model rows for {} start at {}".format(model_name, start_of_model_rows))
+        size_of_model_rows, end_of_model_rows_size_elem = self.__read_size_elem(start_of_model_rows)
+
+        rows = []
+        print("Size of model rows is {}".format(size_of_model_rows))
+        row_header_buffer = 'x' * len(Database.row_header_element)
+        read_count = 0
+
+        with open(self.path, 'r') as f:
+            f.seek(end_of_model_rows_size_elem)
+            while f.tell() < int(size_of_model_rows) + end_of_model_rows_size_elem:
+                char = f.read(1)
+
+                if not char:
+                    raise Exception("EOF reached reading model rows for {}".format(model_name))
+
+                row_header_buffer = row_header_buffer[1:] + char
+
+                if row_header_buffer == Database.row_header_element:
+                    print("Row header found")
+                    this_row_size, end_of_size_elem = self.__read_size_elem(f.tell())
+                    f.seek(end_of_size_elem)
+                    row_buffer = f.read(int(this_row_size))
+                    rows.append(self._parse_row_block(row_buffer, model_definition))
+
+        return rows
+
+    def _parse_row_block(self, row_block, model_definition):
+        print(row_block)
+        return 1
+
     def insert_model(self, model_name, model_instance):
         model_definition = self.get_model_definition(model_name)
         self._check_model_fits_definition(model_definition, model_instance)

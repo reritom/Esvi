@@ -47,3 +47,5 @@ if __name__=='__main__':
 
     db.add_model_definition(definition)
     db.insert_model(model_name="Plant", model_instance={'type': 'tree'})
+
+    print(db.get_all_given_models(model_name="Client"))
