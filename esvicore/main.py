@@ -41,3 +41,9 @@ if __name__=='__main__':
     person_instance = {'age': 12,
                        'name': "Rob"}
     db.insert_model(model_name="Person", model_instance=person_instance)
+
+    definition = {'model_name': 'Plant',
+                  'fields': {'type': {'type': str, 'pk': True}}}
+
+    db.add_model_definition(definition)
+    db.insert_model(model_name="Plant", model_instance={'type': 'tree'})

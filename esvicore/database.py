@@ -267,8 +267,6 @@ class Database():
             f.write(new_rows_size_elem)
             f.write(new_row)
             f.write(rest_of_db)
-            print("REST OF DB")
-            print(rest_of_db)
 
     def _create_size_elem(self, size):
         size = "{}{}{}".format(Database.size_header_element,
@@ -407,33 +405,54 @@ class Database():
     def insert_model(self, model_name, model_instance):
         model_definition = self.get_model_definition(model_name)
         self._check_model_fits_definition(model_definition, model_instance)
-        start_of_model_rows = self._start_of_model_rows(model_name)
+
+        end_of_index = self._end_of_index()
+        start_of_rows = end_of_index + len(Database.rows_header_element)
+        # start_of_rows -> <Rows>x
+        start_to_start_of_rows = self._get_start_to_here(start_of_rows)
+
+        size_of_rows, end_of_rows_size_elem = self.__read_size_elem(start_of_rows)
+        # end_of_rows_size_elem -> <Rows><Size>n</Size>x
+
+        start_of_model_rows = self._start_of_model_rows(model_name=model_name, end_of_index=end_of_index)
         size_of_model_rows, end_of_size_elem = self.__read_size_elem(start_of_model_rows)
 
-        print("Start of model rows {}".format(start_of_model_rows))
-        start_to_here = self._get_start_to_here(start_of_model_rows)
+        end_of_rows_size_to_new_model = self._from_a_to_b(end_of_rows_size_elem, start_of_model_rows)
+
+        start_to_start_of_model_rows = self._get_start_to_here(start_of_model_rows)
         model_string = ''.join(['<{key}>{value}</{key}>'.format(key=key, value=value)
                                for key, value
                                in model_instance.items()])
-        model_string = Database.row_header_element + model_string + Database.row_tail_element
 
-        new_size_elem = self._create_size_elem(int(size_of_model_rows) + len(model_string))
+        model_size_elem = self._create_size_elem(len(model_string))
+        model_string = Database.row_header_element + model_size_elem + model_string + Database.row_tail_element
+
+        existing_model_rows_size_elem_length = end_of_size_elem - start_of_model_rows
+        new_model_rows_size_elem = self._create_size_elem(int(size_of_model_rows) + len(model_string))
+
+        new_rows_size_elem = self._create_size_elem(int(size_of_rows) + len(model_string) + len(new_model_rows_size_elem) - existing_model_rows_size_elem_length)
         _, here_to_end = self._get_cursor_to_end(end_of_size_elem)
 
         with open(self.path, 'w') as f:
-            print(start_to_here)
-            f.write(start_to_here)
-            print(new_size_elem)
-            f.write(new_size_elem)
-            print(model_string)
+            f.write(start_to_start_of_rows)
+            f.write(new_rows_size_elem)
+            f.write(end_of_rows_size_to_new_model)
+            f.write(new_model_rows_size_elem)
             f.write(model_string)
-            print(here_to_end)
             f.write(here_to_end)
 
-    def _start_of_model_rows(self, model_name):
+    def _from_a_to_b(self, a, b):
+        with open(self.path, 'r') as f:
+            f.seek(a)
+            return f.read(b-a)
+
+    def _start_of_model_rows(self, model_name, end_of_index=None):
+        print("Finding model rows")
         # Return the cursor for the beginning of the model rows (after the header)
 
-        end_of_index = self._end_of_index()
+        if not end_of_index:
+            end_of_index = self._end_of_index()
+
         start_of_rows = end_of_index + len(Database.rows_header_element)
         model_header = "<{}>".format(model_name)
 
@@ -450,6 +469,7 @@ class Database():
                     raise Exception("End of file reached searching for {} rows beginning".format(model_name))
 
                 buffer = buffer[1:] + char
+                print("Buffer is {}".format(buffer))
 
                 if buffer == model_header:
                     break
