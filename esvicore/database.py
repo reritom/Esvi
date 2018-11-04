@@ -433,8 +433,19 @@ class Database():
         return rows
 
     def _parse_row_block(self, row_block, model_definition):
+        # TODO parse live using the cursor
+        row_block = row_block.split('><')
         print(row_block)
-        return 1
+        parsed = {}
+
+        for value in row_block:
+            field_name = value.split('/')[1].strip('>').strip('<')
+            field_value = value.split('/')[0].split('>', 1)[1][:-1]
+            print(field_name, field_value)
+            parsed[field_name] = model_definition['fields'][field_name]['type'](field_value)
+
+        print(parsed)
+        return parsed
 
     def insert_model(self, model_name, model_instance):
         model_definition = self.get_model_definition(model_name)
